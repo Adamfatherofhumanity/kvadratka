@@ -20,6 +20,17 @@ enum Solves
     TWO_SOLVES = 2
 };
 
+enum Errors
+{
+    ERROR_EOF = -1,
+    ERROR_A = 0,
+    ERROR_B = 1,
+    ERROR_C = 2,
+    ERROR_SO_MANY = 3,
+    NO_ERRORS = 4,
+    UNEXPECTED_ERROR = 5
+};
+
 struct EquationArgs
 {
     double a;
@@ -29,7 +40,7 @@ struct EquationArgs
 
 struct EquationSolves
 {
-    int number_of_solves;
+    Solves number_of_solves;
     double solve1;
     double solve2;
 };
@@ -40,15 +51,14 @@ void SolutionsOfEquations(const struct EquationArgs * const ptr_args, struct Equ
 void SolutionsOfQuadraticEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves);
 void SolutionsOfLinealEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves);
 
-bool VerificationOfA(struct EquationArgs * const ptr_args);
-bool VerificationOfB(struct EquationArgs * const ptr_args);
-bool VerificationOfC(struct EquationArgs * const ptr_args);
+int VerificationOfEnteredData(struct EquationArgs * const ptr_args);
 void InvalidInput(char arg);
+void InvalidAnswer(void);
 bool CheckString(void);
 
 void Greetings(void);
 void Conclusion(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves);
-void ContinueOrStop(void);
+int ContinueOrStop(void);
 
 void CheckQuadraticRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves);
 void CheckLinealRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves);
@@ -67,7 +77,7 @@ int main(void)
     {
         ungetc(ch, stdin);
 
-        if (VerificationOfA(&args))
+        if (VerificationOfEnteredData(&args) == NO_ERRORS)
         {
             SolutionsOfEquations(&args, &solves);
 
@@ -174,51 +184,52 @@ void SolutionsOfLinealEquations(const struct EquationArgs * const ptr_args, stru
     }
 }
 
-bool VerificationOfA(struct EquationArgs * const ptr_args)
+int VerificationOfEnteredData(struct EquationArgs * const ptr_args)
 {
     assert(ptr_args != NULL);
+    int number_of_scanned_args = -1;
 
-    if (scanf("%lf", &((*ptr_args).a)) != 1)
+    number_of_scanned_args = scanf("%lf %lf %lf", &((*ptr_args).a), &((*ptr_args).b), &((*ptr_args).c));
+
+    if (number_of_scanned_args == 3)
     {
-        InvalidInput('a');
-        return false;
+        if (not CheckString())
+        {
+            number_of_scanned_args += 1;
+        }
     }
 
-    else
+    switch (number_of_scanned_args)
     {
-        return VerificationOfB(ptr_args);
-    }
-}
+        case -1:
+            return ERROR_EOF;
 
-bool VerificationOfB(struct EquationArgs * const ptr_args)
-{
-    assert(ptr_args != NULL);
+        case 0:
+            InvalidInput('a');
+            return ERROR_A;
 
-    if (scanf("%lf", &((*ptr_args).b)) != 1)
-    {
-        InvalidInput('b');
-        return false;
-    }
+        case 1:
+            InvalidInput('b');
+            return ERROR_B;
 
-    else
-    {
-        return VerificationOfC(ptr_args);
-    }
-}
+        case 2:
+            InvalidInput('c');
+            return ERROR_C;
 
-bool VerificationOfC(struct EquationArgs * const ptr_args)
-{
-    assert(ptr_args != NULL);
+        case 3:
+            return NO_ERRORS;
 
-    if (scanf("%lf", &((*ptr_args).c)) != 1)
-    {
-        InvalidInput('c');
-        return false;
-    }
+        case 4:
+            printf("Введены лишние аргументы. Введите данные заново "
+                   "(сначала коэффициент при x^2, потом при x, потом свободный): ");
+            scanf("%*[^\n]");
+            getchar();
+            return ERROR_SO_MANY;
 
-    else
-    {
-        return CheckString();
+        default:
+            printf("Произошла непредвиденная ошибка.\n");
+            return UNEXPECTED_ERROR;
+
     }
 }
 
@@ -227,26 +238,28 @@ void Conclusion(const struct EquationArgs * const ptr_args, const struct Equatio
     assert(ptr_args != NULL);
     assert(ptr_solves != NULL);
 
+    printf("У уравнения %.3lf * x^2 + %.3lf * x + %.3lf ", (*ptr_args).a, (*ptr_args).b, (*ptr_args).c);
+
     switch ((*ptr_solves).number_of_solves)
     {
         case ZERO_SOLVES:
-            printf("У уравнения %.3lf * x^2 + %.3lf * x + %.3lf нет решений.\n", (*ptr_args).a, (*ptr_args).b, (*ptr_args).c);
+            printf("нет решений.\n");
             break;
 
         case ONE_SOLVE:
-            printf("У уравнения %.3lf * x^2 + %.3lf * x + %.3lf одно решение x = %.3lf.\n", (*ptr_args).a, (*ptr_args).b, (*ptr_args).c, (*ptr_solves).solve1);
+            printf("одно решение x = %.3lf.\n", (*ptr_solves).solve1);
             break;
 
         case TWO_SOLVES:
-            printf("У уравнения %.3lf * x^2 + %.3lf * x + %.3lf два решения x1 = %.3lf и x2 = %.3lf.\n", (*ptr_args).a, (*ptr_args).b, (*ptr_args).c, (*ptr_solves).solve1, (*ptr_solves).solve2);
+            printf("два решения x1 = %.3lf и x2 = %.3lf.\n", (*ptr_solves).solve1, (*ptr_solves).solve2);
             break;
 
         case INF_SOLVES:
-            printf("У уравнения %.3lf * x^2 + %.3lf * x + %.3lf бесконечное количество решений x - любое число.\n", (*ptr_args).a, (*ptr_args).b, (*ptr_args).c);
+            printf("бесконечное количество решений x - любое число.\n");
             break;
 
         default:
-            printf("Произошла непредвиденная ситуация.\n");
+            printf("произошла непредвиденная ситуация.\n");
             break;
     }
 }
@@ -281,19 +294,57 @@ bool CheckString(void)
 
         else
         {
-            printf("Введены лишние аргументы. Введите данные заново "
-                   "(сначала коэффициент при x^2, потом при x, потом свободный):");
-            scanf("%*[^\n]");
-            getchar();
             return false;
         }
     }
 }
 
-void ContinueOrStop(void)
+int ContinueOrStop(void)
 {
-    printf("Введи 3 числа (сначала коэффициент при x^2, потом при x, потом "
-           "свободный) для продолжения или Enter для остановки: ");
+    int answer= 0;
+
+    printf("Хотите продолжить ввод (введите Y если да или N если нет): ");
+
+    while (1)
+    {
+        while ((answer = getchar()) == ' ')
+        {
+            continue;
+        }
+
+        if (answer == 'Y')
+        {
+            if (CheckString())
+            {
+                printf("Введи 3 числа (сначала коэффициент при x^2, потом при x, потом свободный): ");
+                return 0;
+            }
+
+            else
+            {
+                InvalidAnswer();
+            }
+        }
+
+        else if (answer == 'N')
+        {
+            if (CheckString())
+            {
+                printf("Спасибо, что пользовались моей программой.");
+                exit(EXIT_SUCCESS);
+            }
+
+            else
+            {
+                InvalidAnswer();
+            }
+        }
+
+        else
+        {
+            InvalidAnswer();
+        }
+    }
 }
 
 void CheckQuadraticRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves)
@@ -323,4 +374,11 @@ void CheckLinealRoots(const struct EquationArgs * const ptr_args, const struct E
         printf("Произошла ошибка в вычислениях.\n");
         exit(EXIT_FAILURE);
     }
+}
+
+void InvalidAnswer(void)
+{
+    printf("Принимаются только ответы Y/N (введите Y если да или N если нет): ");
+    scanf("%*[^\n]");
+    getchar();
 }
