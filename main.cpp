@@ -4,6 +4,9 @@
 #include <assert.h>
 
 const double EPS = 0.000001;
+bool need_to_continue = true;
+
+// TODO: переделать выход из программы на return 0 в main (убрать exit)
 
 enum Comparison
 {
@@ -20,7 +23,7 @@ enum Solves
     TWO_SOLVES = 2
 };
 
-enum Errors
+enum EquationErrors
 {
     ERROR_EOF = -1,
     ERROR_A = 0,
@@ -58,32 +61,28 @@ bool CheckString(void);
 
 void Greetings(void);
 void Conclusion(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves);
-int ContinueOrStop(void);
+int ContinueOrStop(bool * ptr_need_to_continue);
 
 void CheckQuadraticRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves);
 void CheckLinealRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves);
 
 int main(void)
 {
-    int ch = 0;
-
     EquationArgs args = { };
 
     EquationSolves solves = { };
 
     Greetings();
 
-    while ((ch = getchar()) != '\n')
+    while (need_to_continue)
     {
-        ungetc(ch, stdin);
-
         if (VerificationOfEnteredData(&args) == NO_ERRORS)
         {
             SolutionsOfEquations(&args, &solves);
 
             Conclusion(&args, &solves);
 
-            ContinueOrStop();
+            ContinueOrStop(&need_to_continue);
         }
     }
 
@@ -299,7 +298,7 @@ bool CheckString(void)
     }
 }
 
-int ContinueOrStop(void)
+int ContinueOrStop(bool * ptr_need_to_continue)
 {
     int answer= 0;
 
@@ -307,7 +306,7 @@ int ContinueOrStop(void)
 
     while (1)
     {
-        while ((answer = getchar()) == ' ')
+        while (isspace(answer = getchar()))
         {
             continue;
         }
@@ -319,11 +318,6 @@ int ContinueOrStop(void)
                 printf("¬веди 3 числа (сначала коэффициент при x^2, потом при x, потом свободный): ");
                 return 0;
             }
-
-            else
-            {
-                InvalidAnswer();
-            }
         }
 
         else if (answer == 'N')
@@ -331,19 +325,12 @@ int ContinueOrStop(void)
             if (CheckString())
             {
                 printf("—пасибо, что пользовались моей программой.");
-                exit(EXIT_SUCCESS);
-            }
-
-            else
-            {
-                InvalidAnswer();
+                *ptr_need_to_continue = false;
+                return 0;
             }
         }
 
-        else
-        {
-            InvalidAnswer();
-        }
+        InvalidAnswer();
     }
 }
 
