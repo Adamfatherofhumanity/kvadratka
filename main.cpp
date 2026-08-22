@@ -4,8 +4,9 @@
 #include <assert.h>
 #include <ctype.h>
 #include <math.h>
+#include <string.h>
 
-const double EPS = 0.000001;
+const double EPS = 1e-6;
 
 enum Comparison
 {
@@ -54,7 +55,7 @@ void SolutionsOfQuadraticEquations(const struct EquationArgs * const ptr_args, s
 void SolutionsOfLinealEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves);
 
 int VerificationOfEnteredData(struct EquationArgs * const ptr_args);
-void InvalidInput(int code_of_error);
+void InvalidInput(int code_of_error, bool * ptr_need_to_continue);
 void InvalidAnswer(void);
 bool CheckString(void);
 
@@ -68,32 +69,45 @@ bool CheckEquationErrors(void);
 
 void SkipString(void);
 
-int main(void)
+void RunTests(struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves, int number_of_random_tests);
+void TestModeGreetings(void);
+int StringToNumber(char * string);
+
+int main(int argc, char * argv[])
 {
     EquationArgs args = { };
-
     EquationSolves solves = { };
 
-    Greetings();
-
-    bool need_to_continue = true;
-
-    while (need_to_continue)
+    if (argc == 3 && strcmp(argv[1], "test") == 0)
     {
-        int code_of_error = VerificationOfEnteredData(&args);
+        int number_of_random_tests = StringToNumber(argv[2]);
+        TestModeGreetings();
+        RunTests(&args, &solves, number_of_random_tests);
+    }
 
-        if (code_of_error == NO_ERRORS)
+    else
+    {
+        Greetings();
+
+        bool need_to_continue = true;
+
+        while (need_to_continue)
         {
-            SolutionsOfEquations(&args, &solves);
+            int code_of_error = VerificationOfEnteredData(&args);
 
-            PrintEnding(&args, &solves);
+            if (code_of_error == NO_ERRORS)
+            {
+                SolutionsOfEquations(&args, &solves);
 
-            ContinueOrStop(&need_to_continue);
-        }
+                PrintEnding(&args, &solves);
 
-        else
-        {
-            InvalidInput(code_of_error);
+                ContinueOrStop(&need_to_continue);
+            }
+
+            else
+            {
+                InvalidInput(code_of_error, &need_to_continue);
+            }
         }
     }
 
@@ -211,7 +225,7 @@ int VerificationOfEnteredData(struct EquationArgs * const ptr_args)
         }
     }
 
-    return number_of_scanned_args;
+    return number_of_scanned_args; //количество возвращённых элементов равно коду ошибки
 }
 
 void PrintEnding(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves)
@@ -251,7 +265,7 @@ void Greetings(void)
            "Введи 3 числа (сначала коэффициент при x^2, потом при x, потом свободный): ");
 }
 
-void InvalidInput(int code_of_error)
+void InvalidInput(int code_of_error, bool * ptr_need_to_continue)
 {
     if (code_of_error == ERROR_A || code_of_error == ERROR_B || code_of_error == ERROR_C)
     {
@@ -263,7 +277,7 @@ void InvalidInput(int code_of_error)
     else if (code_of_error == ERROR_EOF)
     {
         printf("Конец файла.");
-        assert(false);
+        *ptr_need_to_continue = false;
     }
 
     else if (code_of_error == ERROR_SO_MANY)
@@ -276,7 +290,7 @@ void InvalidInput(int code_of_error)
     else
     {
         printf("Произошла непредвиденная ошибка.\n");
-        assert(false);
+        *ptr_need_to_continue = false;
     }
 }
 
@@ -385,4 +399,51 @@ void SkipString(void)
 {
     scanf("%*[^\n]");
     getchar();
+}
+
+void TestModeGreetings(void)
+{
+    printf("Начинаю unit-тестирование модуля SolutionsOfLinealEquations.\n");
+}
+
+void RunTests(struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves, int number_of_random_tests)
+{
+    for (int first_arg = 0; first_arg < 2; first_arg++)
+    {
+            for (int second_arg = 0; second_arg < 2; second_arg++)
+        {
+                for (int third_arg = 0; third_arg < 2; third_arg++)
+            {
+                ptr_args->a = first_arg;
+                ptr_args->b = second_arg;
+                ptr_args->c = third_arg;
+                *ptr_solves = { };
+                SolutionsOfEquations(ptr_args, ptr_solves);
+            }
+        }
+    }
+
+    for (int iteration = 0; iteration < number_of_random_tests; iteration++)
+    {
+        ptr_args->a = (16384-rand())/100;
+        ptr_args->b = (16384-rand())/100;
+        ptr_args->c = (16384-rand())/100;
+        *ptr_solves = { };
+        SolutionsOfEquations(ptr_args, ptr_solves);
+    }
+
+    printf("Успешное тестирование. Пройдено %d/%d тестов.\n", number_of_random_tests, number_of_random_tests);
+}
+
+int StringToNumber(char * str)
+{
+    int number = 0;
+    int length = strlen(str);
+
+    for (int digit_place = length-1; digit_place >= 0; digit_place--)
+    {
+        number += int (pow(10, digit_place)) * (str[length-digit_place-1]-'0');
+    }
+
+    return number;
 }
