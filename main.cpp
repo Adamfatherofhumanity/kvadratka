@@ -9,7 +9,7 @@
 const double EPS = 1e-6;
 
 const int MINIMUM_ARGS_FOR_TEST = 2;
-const int NUMBER_OF_SPECIAL_TESTS = 8;
+const int DEFAULT_NUMBER_OF_RANDOM_TESTS = 1000;
 const double ACCURACY = 1000;
 
 const int ARGC_FOR_HELP = 2;
@@ -57,15 +57,21 @@ struct EquationSolves
 struct TestCase
 {
     struct EquationArgs args;
-    struct EquationSolves solves;
     struct EquationSolves reference_solves;
 };
 
+const struct TestCase SPECIAL_TESTS_VALUES[] = {{{.a = 0, .b = 0, .c = 0}, {.number_of_solves = INF_SOLVES}},
+    {{.a = 0, .b = 0, .c = 1}, {.number_of_solves = ZERO_SOLVES}},
+    {{.a = 0, .b = 1, .c = 1}, {.number_of_solves = ONE_SOLVE, .solve1 = -1}},
+    {{.a = 1, .b = 1, .c = 1}, {.number_of_solves = ZERO_SOLVES}},
+    {{.a = 1, .b = 2, .c = 1}, {.number_of_solves = ONE_SOLVE, .solve1 = -1, .solve2 = -1}},
+    {{.a = 1, .b = 5, .c = 6}, {.number_of_solves = TWO_SOLVES, .solve1 = -2, .solve2 = -3}}};
+
 int ComparisonOfFractalNumbers(const double a, const double b);
 
-void SolutionsOfEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves);
-void SolutionsOfQuadraticEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves);
-void SolutionsOfLinealEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves);
+bool SolutionsOfEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves);
+bool SolutionsOfQuadraticEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves);
+bool SolutionsOfLinealEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves);
 
 int VerificationOfEnteredData(struct EquationArgs * const ptr_args);
 void InvalidInput(const int code_of_error, bool * ptr_need_to_continue);
@@ -76,16 +82,16 @@ void Greetings(void);
 void PrintEnding(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves);
 int ContinueOrStop(bool * ptr_need_to_continue);
 
-void CheckQuadraticRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves);
-void CheckLinealRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves);
+bool CheckQuadraticRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves);
+bool CheckLinealRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves);
 bool CheckEquationErrors(void);
 
 void SkipString(void);
 
 void RunTests(const int number_of_random_tests, const bool visible_values);
-void RunSpecialTests(const bool visible_values);
-void RunRandomTests(const int number_of_random_tests, const bool visible_values);
-void RunOneTest(struct TestCase * const ptr_test, bool visible_values);
+int RunSpecialTests(const bool visible_values);
+int RunRandomTests(const int number_of_random_tests, const bool visible_values);
+int RunOneTest(const struct TestCase * const ptr_test, const bool visible_values);
 
 void TestModeGreetings(void);
 void InvalidCommand(void);
@@ -95,6 +101,7 @@ void ClientProgram();
 void TestingProgram(const int argc, const char * const argv[]);
 
 void Help(void);
+int SpecialTestsCounter(const struct TestCase * const ptr_test, const bool visible_values);
 
 int main(int argc, char * argv[])
 {
@@ -116,19 +123,19 @@ int main(int argc, char * argv[])
     return 0;
 }
 
-void SolutionsOfEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves)
+bool SolutionsOfEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves)
 {
     assert(ptr_args != NULL);
     assert(ptr_solves != NULL);
 
     if (ComparisonOfFractalNumbers(ptr_args->a, 0.0) == EQUAL)
     {
-        SolutionsOfLinealEquations(ptr_args, ptr_solves);
+        return SolutionsOfLinealEquations(ptr_args, ptr_solves);
     }
 
     else
     {
-        SolutionsOfQuadraticEquations(ptr_args, ptr_solves);
+        return SolutionsOfQuadraticEquations(ptr_args, ptr_solves);
     }
 }
 
@@ -150,7 +157,7 @@ int ComparisonOfFractalNumbers(const double a, const double b)
     }
 }
 
-void SolutionsOfQuadraticEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves)
+bool SolutionsOfQuadraticEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves)
 {
     assert(ptr_args != NULL);
     assert(ptr_solves != NULL);
@@ -160,6 +167,7 @@ void SolutionsOfQuadraticEquations(const struct EquationArgs * const ptr_args, s
     if (discriminant < 0)
     {
         ptr_solves->number_of_solves = ZERO_SOLVES;
+        return true;
     }
 
     else if (ComparisonOfFractalNumbers(discriminant, 0.0) == EQUAL)
@@ -168,7 +176,7 @@ void SolutionsOfQuadraticEquations(const struct EquationArgs * const ptr_args, s
         ptr_solves->solve2 = (-ptr_args->b) / (2 * ptr_args->a);
         ptr_solves->number_of_solves = ONE_SOLVE;
 
-        CheckQuadraticRoots(ptr_args, ptr_solves);
+        return CheckQuadraticRoots(ptr_args, ptr_solves);
     }
 
     else
@@ -179,11 +187,11 @@ void SolutionsOfQuadraticEquations(const struct EquationArgs * const ptr_args, s
         ptr_solves->solve2 = (-ptr_args->b + sqrt_discriminant) / (2 * ptr_args->a);
         ptr_solves->number_of_solves = TWO_SOLVES;
 
-        CheckQuadraticRoots(ptr_args, ptr_solves);
+        return CheckQuadraticRoots(ptr_args, ptr_solves);
     }
 }
 
-void SolutionsOfLinealEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves)
+bool SolutionsOfLinealEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves)
 {
     assert(ptr_args != NULL);
     assert(ptr_solves != NULL);
@@ -193,11 +201,13 @@ void SolutionsOfLinealEquations(const struct EquationArgs * const ptr_args, stru
         if (ComparisonOfFractalNumbers(ptr_args->c, 0.0) == EQUAL)
         {
             ptr_solves->number_of_solves = INF_SOLVES;
+            return true;
         }
 
         else
         {
             ptr_solves->number_of_solves = ZERO_SOLVES;
+            return true;
         }
     }
 
@@ -206,7 +216,7 @@ void SolutionsOfLinealEquations(const struct EquationArgs * const ptr_args, stru
         ptr_solves->solve1 = (-ptr_args->c) / ptr_args->b;
         ptr_solves->number_of_solves = ONE_SOLVE;
 
-        CheckLinealRoots(ptr_args, ptr_solves);
+        return CheckLinealRoots(ptr_args, ptr_solves);
     }
 }
 
@@ -221,7 +231,7 @@ int VerificationOfEnteredData(struct EquationArgs * const ptr_args)
 
     if (number_of_scanned_args == 3)
     {
-        if (not CheckString())
+        if (! CheckString())
         {
             number_of_scanned_args += 1;
         }
@@ -357,7 +367,7 @@ int ContinueOrStop(bool * ptr_need_to_continue)
     }
 }
 
-void CheckQuadraticRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves)
+bool CheckQuadraticRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves)
 {
     assert(ptr_args != NULL);
     assert(ptr_solves != NULL);
@@ -369,11 +379,14 @@ void CheckQuadraticRoots(const struct EquationArgs * const ptr_args, const struc
     {
         printf("Произошла ошибка в вычислениях.\n");
         printf("a = %lf, b = %lf, c = %lf, x1 = %lf, x2 = %lf.\n", ptr_args->a, ptr_args->b, ptr_args->c, ptr_solves->solve1, ptr_solves->solve2);
-        assert(false);
+
+        return false;
     }
+
+    return true;
 }
 
-void CheckLinealRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves)
+bool CheckLinealRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves)
 {
     assert(ptr_args != NULL);
     assert(ptr_solves != NULL);
@@ -384,8 +397,11 @@ void CheckLinealRoots(const struct EquationArgs * const ptr_args, const struct E
     {
         printf("Произошла ошибка в вычислениях.\n");
         printf("b = %lf, c = %lf, x = %lf.\n", ptr_args->b, ptr_args->c, ptr_solves->solve1);
-        assert(false);
+
+        return false;
     }
+
+    return true;
 }
 
 void InvalidAnswer(void)
@@ -412,11 +428,21 @@ void TestModeGreetings(void)
 
 void RunTests(const int number_of_random_tests, const bool visible_values)
 {
-    RunSpecialTests(visible_values);
+    if (visible_values)
+    {
+        printf("\nНачинаю прохождение заданных тестов.\n\n");
+    }
 
-    RunRandomTests(number_of_random_tests, visible_values);
+    int success_special_tests = RunSpecialTests(visible_values);
 
-    printf("Успешное тестирование. Пройдено %d/%d тестов.\n", number_of_random_tests+NUMBER_OF_SPECIAL_TESTS, number_of_random_tests+NUMBER_OF_SPECIAL_TESTS);
+    if (visible_values)
+    {
+        printf("\nНачинаю прохождение рандомных тестов.\n\n");
+    }
+
+    int success_random_tests = RunRandomTests(number_of_random_tests, visible_values);
+
+    printf("\nУспешное тестирование. Пройдено %d/%d заданных тестов и %d/%d рандомных тестов.\n", success_special_tests, sizeof (SPECIAL_TESTS_VALUES) / sizeof (TestCase), success_random_tests, number_of_random_tests);
 }
 
 void InvalidCommand(void)
@@ -425,43 +451,40 @@ void InvalidCommand(void)
            "name_of_file --help в командную строку\n");
 }
 
-void RunSpecialTests(const bool visible_values)
+int RunSpecialTests(const bool visible_values)
 {
-    struct TestCase test = {{.a = 0, .b = 0, .c = 0}, { }, {.number_of_solves = INF_SOLVES}};
-    RunOneTest(&test, visible_values);
+    int success_special_tests = 0;
 
-    test = {{.a = 0, .b = 0, .c = 1}, { }, {.number_of_solves = ZERO_SOLVES}};
-    RunOneTest(&test, visible_values);
+    for (size_t iteration = 0; iteration < sizeof (SPECIAL_TESTS_VALUES) / sizeof (TestCase); iteration++)
+    {
+        success_special_tests = SpecialTestsCounter(&SPECIAL_TESTS_VALUES[iteration], visible_values);
+    }
 
-    test = {{.a = 0, .b = 1, .c = 1}, { }, {.number_of_solves = ONE_SOLVE, .solve1 = -1}};
-    RunOneTest(&test, visible_values);
-
-    test = {{.a = 1, .b = 1, .c = 1}, { }, {.number_of_solves = ZERO_SOLVES}};
-    RunOneTest(&test, visible_values);
-
-    test = {{.a = 1, .b = 2, .c = 1}, { }, {.number_of_solves = ONE_SOLVE, .solve1 = -1, .solve2 = -1}};
-    RunOneTest(&test, visible_values);
-
-    test = {{.a = 1, .b = 5, .c = 6}, { }, {.number_of_solves = TWO_SOLVES, .solve1 = -2, .solve2 = -3}};
-    RunOneTest(&test, visible_values);
+    return success_special_tests;
 }
 
-void RunRandomTests(const int number_of_random_tests, const bool visible_values)
+int RunRandomTests(const int number_of_random_tests, const bool visible_values)
 {
     struct EquationArgs args = { };
     struct EquationSolves solves = { };
 
+    int success_random_tests = 0;
+
     for (int iteration = 0; iteration < number_of_random_tests; iteration++)
     {
-        args.a = (RAND_MAX/2-rand())/ACCURACY;
-        args.b = (RAND_MAX/2-rand())/ACCURACY;
-        args.c = (RAND_MAX/2-rand())/ACCURACY;
+        args = {.a = (RAND_MAX/2-rand())/ACCURACY, .b = (RAND_MAX/2-rand())/ACCURACY, .c = (RAND_MAX/2-rand())/ACCURACY};
 
         solves = { };
 
-        SolutionsOfEquations(&args, &solves);
+        if (SolutionsOfEquations(&args, &solves))
+        {
+            success_random_tests += 1;
+        }
+
         PrintValues(&args, &solves, visible_values);
     }
+
+    return success_random_tests;
 }
 
 void PrintValues(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves, const bool visible_values)
@@ -509,75 +532,63 @@ void TestingProgram(const int argc, const char * const argv[])
 {
     assert(argv != NULL);
 
-    if (argc == MINIMUM_ARGS_FOR_TEST)
+    bool visible_values = false;
+    int number_of_random_tests = DEFAULT_NUMBER_OF_RANDOM_TESTS;
+
+    for (int number_of_arg = MINIMUM_ARGS_FOR_TEST; number_of_arg < argc; number_of_arg++)
     {
-        bool visible_values = false;
-        int number_of_random_tests = 1000;
-        TestModeGreetings();
-        RunTests(number_of_random_tests, visible_values);
-    }
-
-    else if (argc == MINIMUM_ARGS_FOR_TEST+1)
-    {
-        if (strcmp(argv[MINIMUM_ARGS_FOR_TEST], "-v") == 0)
+        if (strcmp(argv[number_of_arg], "-v") == 0)
         {
-            bool visible_values = true;
-            int number_of_random_tests = 1000;
-            TestModeGreetings();
-            RunTests(number_of_random_tests, visible_values);
-        }
-
-        else
-        {
-            bool visible_values = false;
-
-            if (int number_of_random_tests = atoi(argv[MINIMUM_ARGS_FOR_TEST])) //если поданная строка содержит что-то кроме цифр, то возвращается false
-            {
-                TestModeGreetings();
-                RunTests(number_of_random_tests, visible_values);
-            }
+            visible_values = true;
+            break;
         }
     }
 
-    else if (argc == MINIMUM_ARGS_FOR_TEST+2 && strcmp(argv[MINIMUM_ARGS_FOR_TEST+1], "-v") == 0)
+    for (int number_of_arg = MINIMUM_ARGS_FOR_TEST; number_of_arg < argc; number_of_arg++)
     {
-        bool visible_values = true;
-
-        if (int number_of_random_tests = atoi(argv[MINIMUM_ARGS_FOR_TEST])) //если поданная строка содержит что-то кроме цифр, то возвращается false
+        if (atoi(argv[number_of_arg]))
         {
-            TestModeGreetings();
-            RunTests(number_of_random_tests, visible_values);
+            number_of_random_tests = atoi(argv[number_of_arg]);
+            break;
         }
     }
 
-    else
-    {
-        InvalidCommand();
-    }
+    TestModeGreetings();
+    RunTests(number_of_random_tests, visible_values);
 }
 
-void RunOneTest(struct TestCase * const ptr_test, bool visible_values)
+int RunOneTest(const struct TestCase * const ptr_test, const bool visible_values)
 {
     assert(ptr_test != NULL);
 
-    SolutionsOfEquations(&(ptr_test->args), &(ptr_test->solves));
-    PrintValues(&(ptr_test->args), &(ptr_test->solves), visible_values);
+    struct EquationSolves solves = { };
 
-    double solve1 = (ptr_test->solves).solve1;
-    double solve2 = (ptr_test->solves).solve2;
+    SolutionsOfEquations(&(ptr_test->args), &solves);
+
+    double solve1 = solves.solve1;
+    double solve2 = solves.solve2;
 
     double reference_solve1 = (ptr_test->reference_solves).solve1;
     double reference_solve2 = (ptr_test->reference_solves).solve2;
 
-    if (not ((ptr_test->solves).number_of_solves == (ptr_test->reference_solves).number_of_solves &&
+    if (! (solves.number_of_solves == (ptr_test->reference_solves).number_of_solves &&
     ((ComparisonOfFractalNumbers(solve1, reference_solve1) == EQUAL && ComparisonOfFractalNumbers(solve2, reference_solve2) == EQUAL) ||
     (ComparisonOfFractalNumbers(solve1, reference_solve2) == EQUAL && ComparisonOfFractalNumbers(solve2, reference_solve1) == EQUAL))))
     {
         printf("Произошла ошибка в вычислениях.\n");
+
         printf("a = %.3lf, b = %.3lf, c = %.3lf, number_of_solves = %d, x1 = %.3lf, x2 = %.3lf.\n",
-        (ptr_test->args).a, (ptr_test->args).b, (ptr_test->args).c, (ptr_test->solves).number_of_solves, solve1, solve2);
+        (ptr_test->args).a, (ptr_test->args).b, (ptr_test->args).c, solves.number_of_solves, solve1, solve2);
+
         printf("number_of_solves_ref = %d, x1_ref = %.3lf, x2_ref = %.3lf\n", (ptr_test->reference_solves).number_of_solves, reference_solve1, reference_solve2);
-        assert(false);
+
+        return 0;
+    }
+
+    else
+    {
+        PrintValues(&(ptr_test->args), &solves, visible_values);
+        return 1;
     }
 }
 
@@ -589,3 +600,13 @@ void Help(void)
            " своё значение) -v (вывод проверяемых аргументов, без флага не выводятся)\n");
     printf("В остальных случаях запустится режим взаимодействия с пользователем.\n");
 }
+
+int SpecialTestsCounter(const struct TestCase * const ptr_test, const bool visible_values)
+{
+    static int special_tests_counter = 0;
+
+    special_tests_counter += RunOneTest(ptr_test, visible_values);
+    return special_tests_counter;
+}
+
+// TODO: fopen fclose fseek прочитать
