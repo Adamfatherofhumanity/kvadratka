@@ -14,6 +14,8 @@ const double ACCURACY = 1000;
 
 const int ARGC_FOR_HELP = 2;
 
+const char DEFAULT_NAME_OF_FILE[] = "test.txt";
+
 enum Comparison
 {
     BIGGER = 1,
@@ -49,7 +51,7 @@ struct EquationArgs
 
 struct EquationSolves
 {
-    Solves number_of_solves;
+    int number_of_solves;
     double solve1;
     double solve2;
 };
@@ -61,11 +63,11 @@ struct TestCase
 };
 
 const struct TestCase SPECIAL_TESTS_VALUES[] = {{{.a = 0, .b = 0, .c = 0}, {.number_of_solves = INF_SOLVES}},
-    {{.a = 0, .b = 0, .c = 1}, {.number_of_solves = ZERO_SOLVES}},
-    {{.a = 0, .b = 1, .c = 1}, {.number_of_solves = ONE_SOLVE, .solve1 = -1}},
-    {{.a = 1, .b = 1, .c = 1}, {.number_of_solves = ZERO_SOLVES}},
-    {{.a = 1, .b = 2, .c = 1}, {.number_of_solves = ONE_SOLVE, .solve1 = -1, .solve2 = -1}},
-    {{.a = 1, .b = 5, .c = 6}, {.number_of_solves = TWO_SOLVES, .solve1 = -2, .solve2 = -3}}};
+                                                {{.a = 0, .b = 0, .c = 1}, {.number_of_solves = ZERO_SOLVES}},
+                                                {{.a = 0, .b = 1, .c = 1}, {.number_of_solves = ONE_SOLVE, .solve1 = -1}},
+                                                {{.a = 1, .b = 1, .c = 1}, {.number_of_solves = ZERO_SOLVES}},
+                                                {{.a = 1, .b = 2, .c = 1}, {.number_of_solves = ONE_SOLVE, .solve1 = -1, .solve2 = -1}},
+                                                {{.a = 1, .b = 5, .c = 6}, {.number_of_solves = TWO_SOLVES, .solve1 = -2, .solve2 = -3}}};
 
 int ComparisonOfFractalNumbers(const double a, const double b);
 
@@ -91,17 +93,18 @@ void SkipString(void);
 void RunTests(const int number_of_random_tests, const bool visible_values);
 int RunSpecialTests(const bool visible_values);
 int RunRandomTests(const int number_of_random_tests, const bool visible_values);
-int RunOneTest(const struct TestCase * const ptr_test, const bool visible_values);
+bool RunOneTest(const struct TestCase * const ptr_test, const bool visible_values);
 
 void TestModeGreetings(void);
 void InvalidCommand(void);
 void PrintValues(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves, const bool visible_values);
 
 void ClientProgram();
-void TestingProgram(const int argc, const char * const argv[]);
+void TestingProgram(const int argc, char * argv[]);
 
 void Help(void);
-int SpecialTestsCounter(const struct TestCase * const ptr_test, const bool visible_values);
+
+void RunFileTests(const char * const ptr_name_of_file, const bool visible_values);
 
 int main(int argc, char * argv[])
 {
@@ -442,7 +445,7 @@ void RunTests(const int number_of_random_tests, const bool visible_values)
 
     int success_random_tests = RunRandomTests(number_of_random_tests, visible_values);
 
-    printf("\nУспешное тестирование. Пройдено %d/%d заданных тестов и %d/%d рандомных тестов.\n", success_special_tests, sizeof (SPECIAL_TESTS_VALUES) / sizeof (TestCase), success_random_tests, number_of_random_tests);
+    printf("\nТестирование окончено. Пройдено %d/%d заданных тестов и %d/%d рандомных тестов.\n", success_special_tests, sizeof (SPECIAL_TESTS_VALUES) / sizeof (TestCase), success_random_tests, number_of_random_tests);
 }
 
 void InvalidCommand(void)
@@ -457,7 +460,15 @@ int RunSpecialTests(const bool visible_values)
 
     for (size_t iteration = 0; iteration < sizeof (SPECIAL_TESTS_VALUES) / sizeof (TestCase); iteration++)
     {
-        success_special_tests = SpecialTestsCounter(&SPECIAL_TESTS_VALUES[iteration], visible_values);
+        if (RunOneTest(&SPECIAL_TESTS_VALUES[iteration], visible_values))
+        {
+            success_special_tests += 1;
+        }
+
+        else
+        {
+            printf("Произошла ошибка в вычислениях на %d тесте.\n", iteration+1);
+        }
     }
 
     return success_special_tests;
@@ -528,36 +539,51 @@ void ClientProgram()
     }
 }
 
-void TestingProgram(const int argc, const char * const argv[])
+void TestingProgram(const int argc, char * argv[])
 {
     assert(argv != NULL);
 
     bool visible_values = false;
     int number_of_random_tests = DEFAULT_NUMBER_OF_RANDOM_TESTS;
+    bool file_testing = false;
+    const char * ptr_name_of_file = DEFAULT_NAME_OF_FILE;
 
     for (int number_of_arg = MINIMUM_ARGS_FOR_TEST; number_of_arg < argc; number_of_arg++)
     {
-        if (strcmp(argv[number_of_arg], "-v") == 0)
+        if (strcmp(argv[number_of_arg], "-f") == 0)
+        {
+            file_testing = true;
+        }
+
+        else if (strcmp(argv[number_of_arg], "-v") == 0)
         {
             visible_values = true;
-            break;
         }
-    }
 
-    for (int number_of_arg = MINIMUM_ARGS_FOR_TEST; number_of_arg < argc; number_of_arg++)
-    {
-        if (atoi(argv[number_of_arg]))
+        else if (atoi(argv[number_of_arg]))
         {
             number_of_random_tests = atoi(argv[number_of_arg]);
-            break;
+        }
+
+        else
+        {
+            ptr_name_of_file = argv[number_of_arg];
         }
     }
 
     TestModeGreetings();
-    RunTests(number_of_random_tests, visible_values);
+    if (file_testing)
+    {
+        RunFileTests(ptr_name_of_file, visible_values);
+    }
+
+    else
+    {
+        RunTests(number_of_random_tests, visible_values);
+    }
 }
 
-int RunOneTest(const struct TestCase * const ptr_test, const bool visible_values)
+bool RunOneTest(const struct TestCase * const ptr_test, const bool visible_values)
 {
     assert(ptr_test != NULL);
 
@@ -582,13 +608,13 @@ int RunOneTest(const struct TestCase * const ptr_test, const bool visible_values
 
         printf("number_of_solves_ref = %d, x1_ref = %.3lf, x2_ref = %.3lf\n", (ptr_test->reference_solves).number_of_solves, reference_solve1, reference_solve2);
 
-        return 0;
+        return false;
     }
 
     else
     {
         PrintValues(&(ptr_test->args), &solves, visible_values);
-        return 1;
+        return true;
     }
 }
 
@@ -598,15 +624,42 @@ void Help(void)
     printf("Для режима тестирования надо ввести определённые аргументы в командную строку. Вот пример правильного ввода:\n"
            "name_of_file test number_of_random_tests (по умолчанию 1000, можно задать"
            " своё значение) -v (вывод проверяемых аргументов, без флага не выводятся)\n");
+    printf("Также можно подключить тесты из файла, для этого надо ввести флаг -f и написать название файла с тестами (по умолчанию test.txt)\n");
     printf("В остальных случаях запустится режим взаимодействия с пользователем.\n");
 }
 
-int SpecialTestsCounter(const struct TestCase * const ptr_test, const bool visible_values)
+void RunFileTests(const char * const ptr_name_of_file, const bool visible_values)
 {
-    static int special_tests_counter = 0;
+    assert(ptr_name_of_file != NULL);
 
-    special_tests_counter += RunOneTest(ptr_test, visible_values);
-    return special_tests_counter;
+    FILE * ptr_test_file = NULL;
+
+    int iteration = 0;
+    int success_file_tests = 0;
+
+    ptr_test_file = fopen(ptr_name_of_file, "r");
+
+    assert(ptr_test_file != NULL);
+
+    struct TestCase test = { };
+
+    while (fscanf(ptr_test_file, "%lf %lf %lf %d %lf %lf", &(test.args.a), &(test.args.b), &(test.args.c),
+    &(test.reference_solves.number_of_solves), &(test.reference_solves.solve1), &(test.reference_solves.solve2)) == 6)
+    {
+        iteration += 1;
+
+        if (RunOneTest(&test, visible_values))
+        {
+            success_file_tests += 1;
+        }
+
+        else
+        {
+            printf("Произошла ошибка в вычислениях на %d тесте.\n", iteration);
+        }
+    }
+
+    printf("Конец файла. Тестирование окончено. Пройдено %d/%d тестов.\n", success_file_tests, iteration);;
 }
 
-// TODO: fopen fclose fseek прочитать
+// TODO: подача в аргв имя файла с тестами
