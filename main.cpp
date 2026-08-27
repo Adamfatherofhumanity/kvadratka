@@ -190,7 +190,7 @@ void TestingProgram(const int argc, char * argv[])
     bool file_testing = false;
     const char * ptr_name_of_file = DEFAULT_NAME_OF_FILE;
 
-    for (size_t number_of_arg = MINIMUM_ARGS_FOR_TEST; number_of_arg < size_t (argc)aaaaaaaaaaaaaaasaeaaaseaeseaaas; number_of_arg++)
+    for (size_t number_of_arg = MINIMUM_ARGS_FOR_TEST; number_of_arg < size_t (argc); number_of_arg++)
     {
         if (strcmp(argv[number_of_arg], "-f") == 0)
         {
