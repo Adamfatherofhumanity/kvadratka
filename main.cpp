@@ -16,6 +16,8 @@ const int ARGC_FOR_HELP = 2;
 
 const char DEFAULT_NAME_OF_FILE[] = "test.txt";
 
+const int CODE_OF_CTRL_Z = 26;
+
 enum Comparison
 {
     BIGGER = 1,
@@ -51,9 +53,9 @@ struct EquationArgs
 
 struct EquationSolves
 {
-    int number_of_solves;
     double solve1;
     double solve2;
+    int number_of_solves;
 };
 
 struct TestCase
@@ -62,12 +64,12 @@ struct TestCase
     struct EquationSolves reference_solves;
 };
 
-const struct TestCase SPECIAL_TESTS_VALUES[] = {{{.a = 0, .b = 0, .c = 0}, {.number_of_solves = INF_SOLVES}},
-                                                {{.a = 0, .b = 0, .c = 1}, {.number_of_solves = ZERO_SOLVES}},
-                                                {{.a = 0, .b = 1, .c = 1}, {.number_of_solves = ONE_SOLVE, .solve1 = -1}},
-                                                {{.a = 1, .b = 1, .c = 1}, {.number_of_solves = ZERO_SOLVES}},
-                                                {{.a = 1, .b = 2, .c = 1}, {.number_of_solves = ONE_SOLVE, .solve1 = -1, .solve2 = -1}},
-                                                {{.a = 1, .b = 5, .c = 6}, {.number_of_solves = TWO_SOLVES, .solve1 = -2, .solve2 = -3}}};
+const struct TestCase SPECIAL_TESTS_VALUES[] = {{{.a = 0, .b = 0, .c = 0}, {.solve1 = 0, .solve2 = 0, .number_of_solves = INF_SOLVES}},
+                                                {{.a = 0, .b = 0, .c = 1}, {.solve1 = 0, .solve2 = 0, .number_of_solves = ZERO_SOLVES}},
+                                                {{.a = 0, .b = 1, .c = 1}, {.solve1 = -1, .solve2 = 0, .number_of_solves = ONE_SOLVE}},
+                                                {{.a = 1, .b = 1, .c = 1}, {.solve1 = 0, .solve2 = 0, .number_of_solves = ZERO_SOLVES}},
+                                                {{.a = 1, .b = 2, .c = 1}, {.solve1 = -1, .solve2 = 0, .number_of_solves = ONE_SOLVE}},
+                                                {{.a = 1, .b = 5, .c = 6}, {.solve1 = -2, .solve2 = -3, .number_of_solves = TWO_SOLVES}}};
 
 int ComparisonOfFractalNumbers(const double a, const double b);
 
@@ -84,8 +86,8 @@ void Greetings(void);
 void PrintEnding(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves);
 int ContinueOrStop(bool * ptr_need_to_continue);
 
-bool CheckQuadraticRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves);
-bool CheckLinealRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves);
+bool CheckTwoRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves);
+bool CheckOneRoot(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves);
 bool CheckEquationErrors(void);
 
 void SkipString(void);
@@ -105,6 +107,8 @@ void TestingProgram(const int argc, char * argv[]);
 void Help(void);
 
 void RunFileTests(const char * const ptr_name_of_file, const bool visible_values);
+
+// main.cpp
 
 int main(int argc, char * argv[])
 {
@@ -126,6 +130,8 @@ int main(int argc, char * argv[])
     return 0;
 }
 
+// solving.cpp
+
 bool SolutionsOfEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves)
 {
     assert(ptr_args != NULL);
@@ -141,6 +147,8 @@ bool SolutionsOfEquations(const struct EquationArgs * const ptr_args, struct Equ
         return SolutionsOfQuadraticEquations(ptr_args, ptr_solves);
     }
 }
+
+// support_functions.cpp
 
 int ComparisonOfFractalNumbers(const double a, const double b)
 {
@@ -160,6 +168,8 @@ int ComparisonOfFractalNumbers(const double a, const double b)
     }
 }
 
+// solving.cpp
+
 bool SolutionsOfQuadraticEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves)
 {
     assert(ptr_args != NULL);
@@ -176,10 +186,9 @@ bool SolutionsOfQuadraticEquations(const struct EquationArgs * const ptr_args, s
     else if (ComparisonOfFractalNumbers(discriminant, 0.0) == EQUAL)
     {
         ptr_solves->solve1 = (-ptr_args->b) / (2 * ptr_args->a);
-        ptr_solves->solve2 = (-ptr_args->b) / (2 * ptr_args->a);
         ptr_solves->number_of_solves = ONE_SOLVE;
 
-        return CheckQuadraticRoots(ptr_args, ptr_solves);
+        return CheckOneRoot(ptr_args, ptr_solves);
     }
 
     else
@@ -190,9 +199,11 @@ bool SolutionsOfQuadraticEquations(const struct EquationArgs * const ptr_args, s
         ptr_solves->solve2 = (-ptr_args->b + sqrt_discriminant) / (2 * ptr_args->a);
         ptr_solves->number_of_solves = TWO_SOLVES;
 
-        return CheckQuadraticRoots(ptr_args, ptr_solves);
+        return CheckTwoRoots(ptr_args, ptr_solves);
     }
 }
+
+// solving.cpp
 
 bool SolutionsOfLinealEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves)
 {
@@ -219,29 +230,31 @@ bool SolutionsOfLinealEquations(const struct EquationArgs * const ptr_args, stru
         ptr_solves->solve1 = (-ptr_args->c) / ptr_args->b;
         ptr_solves->number_of_solves = ONE_SOLVE;
 
-        return CheckLinealRoots(ptr_args, ptr_solves);
+        return CheckOneRoot(ptr_args, ptr_solves);
     }
 }
+
+// input_and_output.cpp
 
 int VerificationOfEnteredData(struct EquationArgs * const ptr_args)
 {
     assert(ptr_args != NULL);
     assert(CheckEquationErrors());
 
-    int number_of_scanned_args = -1;
-
-    number_of_scanned_args = scanf("%lf %lf %lf", &(ptr_args->a), &(ptr_args->b), &(ptr_args->c));
+    int number_of_scanned_args = scanf("%lf %lf %lf", &(ptr_args->a), &(ptr_args->b), &(ptr_args->c));
 
     if (number_of_scanned_args == 3)
     {
         if (! CheckString())
         {
-            number_of_scanned_args += 1;
+            number_of_scanned_args++;
         }
     }
 
     return number_of_scanned_args; //количество возвращённых элементов равно коду ошибки
 }
+
+// input_and_output.cpp
 
 void PrintEnding(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves)
 {
@@ -274,11 +287,15 @@ void PrintEnding(const struct EquationArgs * const ptr_args, const struct Equati
     }
 }
 
+// input_and_output.cpp
+
 void Greetings(void)
 {
     printf("Приветствую, пользователь.\nЯ программа, умеющая решать квадратные уравнения.\n"
            "Введи 3 числа (сначала коэффициент при x^2, потом при x, потом свободный): ");
 }
+
+// input_and_output.cpp
 
 void InvalidInput(const int code_of_error, bool * ptr_need_to_continue)
 {
@@ -287,7 +304,7 @@ void InvalidInput(const int code_of_error, bool * ptr_need_to_continue)
     if (code_of_error == ERROR_A || code_of_error == ERROR_B || code_of_error == ERROR_C)
     {
         printf("Аргумент %c введён неверно. Введите данные заново "
-               "(сначала коэффициент при x^2, потом при x, потом свободный): ", 97+code_of_error);
+               "(сначала коэффициент при x^2, потом при x, потом свободный): ", 'a' + code_of_error);
         SkipString();
     }
 
@@ -301,7 +318,6 @@ void InvalidInput(const int code_of_error, bool * ptr_need_to_continue)
     {
         printf("Введены лишние аргументы. Введите данные заново "
                "(сначала коэффициент при x^2, потом при x, потом свободный): ");
-        SkipString();
     }
 
     else
@@ -311,26 +327,29 @@ void InvalidInput(const int code_of_error, bool * ptr_need_to_continue)
     }
 }
 
+// input_and_output.cpp
+
 bool CheckString(void)
 {
     int ch = 0;
 
-    while (1)
+    while (isspace(ch = getchar()))
     {
-        if (isspace(ch = getchar()))
+        if (ch == '\n')
         {
-            if (ch == '\n')
-            {
-                return true;
-            }
-        }
-
-        else
-        {
-            return false;
+            return true;
         }
     }
+
+    if (ch != CODE_OF_CTRL_Z && ch != EOF)
+    {
+        SkipString();
+    }
+
+    return false;
 }
+
+// input_and_output.cpp
 
 int ContinueOrStop(bool * ptr_need_to_continue)
 {
@@ -370,7 +389,9 @@ int ContinueOrStop(bool * ptr_need_to_continue)
     }
 }
 
-bool CheckQuadraticRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves)
+// solving.cpp
+
+bool CheckTwoRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves)
 {
     assert(ptr_args != NULL);
     assert(ptr_solves != NULL);
@@ -389,12 +410,14 @@ bool CheckQuadraticRoots(const struct EquationArgs * const ptr_args, const struc
     return true;
 }
 
-bool CheckLinealRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves)
+// solving.cpp
+
+bool CheckOneRoot(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves)
 {
     assert(ptr_args != NULL);
     assert(ptr_solves != NULL);
 
-    double value = ptr_args->b * ptr_solves->solve1 + ptr_args->c;
+    double value = ptr_args->a * ptr_solves->solve1 * ptr_solves->solve1 + ptr_args->b * ptr_solves->solve1 + ptr_args->c;
 
     if (ComparisonOfFractalNumbers(value, 0.0) != EQUAL)
     {
@@ -407,27 +430,40 @@ bool CheckLinealRoots(const struct EquationArgs * const ptr_args, const struct E
     return true;
 }
 
+// input_and_output.cpp
+
 void InvalidAnswer(void)
 {
     printf("Принимаются только ответы Y/N (введите Y если да или N если нет): ");
-    SkipString();
 }
+
+// support_functions.cpp
 
 bool CheckEquationErrors(void)
 {
     return (ERROR_EOF == -1 && ERROR_A == 0 && ERROR_B == 1 && ERROR_C == 2 && NO_ERRORS == 3 && ERROR_SO_MANY == 4 && UNEXPECTED_ERROR == 5);
 }
 
+// input_and_output.cpp
+
 void SkipString(void)
 {
-    scanf("%*[^\n]");
-    getchar();
+    int ch = 0;
+
+    while ((ch = getchar()) != CODE_OF_CTRL_Z && ch != '\n' && ch != EOF)
+    {
+        continue;
+    }
 }
+
+// input_and_output.cpp
 
 void TestModeGreetings(void)
 {
     printf("Начинаю unit-тестирование модуля SolutionsOfEquations.\n");
 }
+
+// testing.cpp
 
 void RunTests(const int number_of_random_tests, const bool visible_values)
 {
@@ -445,14 +481,19 @@ void RunTests(const int number_of_random_tests, const bool visible_values)
 
     int success_random_tests = RunRandomTests(number_of_random_tests, visible_values);
 
-    printf("\nТестирование окончено. Пройдено %d/%d заданных тестов и %d/%d рандомных тестов.\n", success_special_tests, sizeof (SPECIAL_TESTS_VALUES) / sizeof (TestCase), success_random_tests, number_of_random_tests);
+    printf("\nТестирование окончено. Пройдено %d/%d заданных тестов и %d/%d рандомных тестов.\n",
+        success_special_tests, sizeof (SPECIAL_TESTS_VALUES) / sizeof (TestCase), success_random_tests, number_of_random_tests);
 }
+
+// input_and_output.cpp
 
 void InvalidCommand(void)
 {
     printf("Ошибка в аргументах командной строки. Для получения помощи в использовании программы введите \n"
            "name_of_file --help в командную строку\n");
 }
+
+// testing.cpp
 
 int RunSpecialTests(const bool visible_values)
 {
@@ -462,7 +503,7 @@ int RunSpecialTests(const bool visible_values)
     {
         if (RunOneTest(&SPECIAL_TESTS_VALUES[iteration], visible_values))
         {
-            success_special_tests += 1;
+            success_special_tests++;
         }
 
         else
@@ -474,6 +515,8 @@ int RunSpecialTests(const bool visible_values)
     return success_special_tests;
 }
 
+// testing.cpp
+
 int RunRandomTests(const int number_of_random_tests, const bool visible_values)
 {
     struct EquationArgs args = { };
@@ -483,13 +526,13 @@ int RunRandomTests(const int number_of_random_tests, const bool visible_values)
 
     for (int iteration = 0; iteration < number_of_random_tests; iteration++)
     {
-        args = {.a = (RAND_MAX/2-rand())/ACCURACY, .b = (RAND_MAX/2-rand())/ACCURACY, .c = (RAND_MAX/2-rand())/ACCURACY};
+        args = {.a = (RAND_MAX / 2 - rand()) / ACCURACY, .b = (RAND_MAX / 2 - rand()) / ACCURACY, .c = (RAND_MAX / 2 - rand()) / ACCURACY};
 
         solves = { };
 
         if (SolutionsOfEquations(&args, &solves))
         {
-            success_random_tests += 1;
+            success_random_tests++;
         }
 
         PrintValues(&args, &solves, visible_values);
@@ -497,6 +540,8 @@ int RunRandomTests(const int number_of_random_tests, const bool visible_values)
 
     return success_random_tests;
 }
+
+// input_and_output.cpp
 
 void PrintValues(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves, const bool visible_values)
 {
@@ -509,6 +554,8 @@ void PrintValues(const struct EquationArgs * const ptr_args, const struct Equati
          ptr_args->a, ptr_args->b, ptr_args->c, ptr_solves->number_of_solves, ptr_solves->solve1, ptr_solves->solve2);
     }
 }
+
+// main.cpp
 
 void ClientProgram()
 {
@@ -538,6 +585,8 @@ void ClientProgram()
         }
     }
 }
+
+// main.cpp
 
 void TestingProgram(const int argc, char * argv[])
 {
@@ -583,6 +632,8 @@ void TestingProgram(const int argc, char * argv[])
     }
 }
 
+// testing.cpp
+
 bool RunOneTest(const struct TestCase * const ptr_test, const bool visible_values)
 {
     assert(ptr_test != NULL);
@@ -594,12 +645,27 @@ bool RunOneTest(const struct TestCase * const ptr_test, const bool visible_value
     double solve1 = solves.solve1;
     double solve2 = solves.solve2;
 
+    double support_for_swap = 0;
+
     double reference_solve1 = (ptr_test->reference_solves).solve1;
     double reference_solve2 = (ptr_test->reference_solves).solve2;
 
-    if (! (solves.number_of_solves == (ptr_test->reference_solves).number_of_solves &&
-    ((ComparisonOfFractalNumbers(solve1, reference_solve1) == EQUAL && ComparisonOfFractalNumbers(solve2, reference_solve2) == EQUAL) ||
-    (ComparisonOfFractalNumbers(solve1, reference_solve2) == EQUAL && ComparisonOfFractalNumbers(solve2, reference_solve1) == EQUAL))))
+    if (ComparisonOfFractalNumbers(solve1, solve2) == SMALLER)
+    {
+        support_for_swap = solve1;
+        solve1 = solve2;
+        solve2 = support_for_swap;
+    }
+
+    if (ComparisonOfFractalNumbers(reference_solve1, reference_solve2) == SMALLER)
+    {
+        support_for_swap = reference_solve1;
+        reference_solve1 = reference_solve2;
+        reference_solve2 = support_for_swap;
+    }
+
+    if (solves.number_of_solves != (ptr_test->reference_solves).number_of_solves ||
+    ComparisonOfFractalNumbers(solve1, reference_solve1) != EQUAL  ComparisonOfFractalNumbers(solve2, reference_solve2) != EQUAL))
     {
         printf("Произошла ошибка в вычислениях.\n");
 
@@ -618,6 +684,8 @@ bool RunOneTest(const struct TestCase * const ptr_test, const bool visible_value
     }
 }
 
+// input_and_output.cpp
+
 void Help(void)
 {
     printf("У программы есть 2 режима: тестирование и взаимодействие с пользователем.\n");
@@ -627,6 +695,8 @@ void Help(void)
     printf("Также можно подключить тесты из файла, для этого надо ввести флаг -f и написать название файла с тестами (по умолчанию test.txt)\n");
     printf("В остальных случаях запустится режим взаимодействия с пользователем.\n");
 }
+
+// testing.cpp
 
 void RunFileTests(const char * const ptr_name_of_file, const bool visible_values)
 {
@@ -646,11 +716,11 @@ void RunFileTests(const char * const ptr_name_of_file, const bool visible_values
     while (fscanf(ptr_test_file, "%lf %lf %lf %d %lf %lf", &(test.args.a), &(test.args.b), &(test.args.c),
     &(test.reference_solves.number_of_solves), &(test.reference_solves.solve1), &(test.reference_solves.solve2)) == 6)
     {
-        iteration += 1;
+        iteration++;
 
         if (RunOneTest(&test, visible_values))
         {
-            success_file_tests += 1;
+            success_file_tests++;
         }
 
         else
@@ -662,4 +732,4 @@ void RunFileTests(const char * const ptr_name_of_file, const bool visible_values
     printf("Конец файла. Тестирование окончено. Пройдено %d/%d тестов.\n", success_file_tests, iteration);;
 }
 
-// TODO: подача в аргв имя файла с тестами
+// TODO: разбить на файлы для удобства в ориентировании по проекту
