@@ -11,6 +11,7 @@ const double EPS = 1e-6;
 const int MINIMUM_ARGS_FOR_TEST = 2;
 const int DEFAULT_NUMBER_OF_RANDOM_TESTS = 1000;
 const double ACCURACY = 1000;
+const int NUMBER_OF_ARGS = 3;
 
 const int ARGC_FOR_HELP = 2;
 
@@ -64,11 +65,11 @@ struct TestCase
     struct EquationSolves reference_solves;
 };
 
-const struct TestCase SPECIAL_TESTS_VALUES[] = {{{.a = 0, .b = 0, .c = 0}, {.solve1 = 0, .solve2 = 0, .number_of_solves = INF_SOLVES}},
-                                                {{.a = 0, .b = 0, .c = 1}, {.solve1 = 0, .solve2 = 0, .number_of_solves = ZERO_SOLVES}},
-                                                {{.a = 0, .b = 1, .c = 1}, {.solve1 = -1, .solve2 = 0, .number_of_solves = ONE_SOLVE}},
-                                                {{.a = 1, .b = 1, .c = 1}, {.solve1 = 0, .solve2 = 0, .number_of_solves = ZERO_SOLVES}},
-                                                {{.a = 1, .b = 2, .c = 1}, {.solve1 = -1, .solve2 = 0, .number_of_solves = ONE_SOLVE}},
+const struct TestCase SPECIAL_TESTS_VALUES[] = {{{.a = 0, .b = 0, .c = 0}, {.solve1 = NAN, .solve2 = NAN, .number_of_solves = INF_SOLVES}},
+                                                {{.a = 0, .b = 0, .c = 1}, {.solve1 = NAN, .solve2 = NAN, .number_of_solves = ZERO_SOLVES}},
+                                                {{.a = 0, .b = 1, .c = 1}, {.solve1 = -1, .solve2 = NAN, .number_of_solves = ONE_SOLVE}},
+                                                {{.a = 1, .b = 1, .c = 1}, {.solve1 = NAN, .solve2 = NAN, .number_of_solves = ZERO_SOLVES}},
+                                                {{.a = 1, .b = 2, .c = 1}, {.solve1 = -1, .solve2 = NAN, .number_of_solves = ONE_SOLVE}},
                                                 {{.a = 1, .b = 5, .c = 6}, {.solve1 = -2, .solve2 = -3, .number_of_solves = TWO_SOLVES}}};
 
 int ComparisonOfFractalNumbers(const double a, const double b);
@@ -108,7 +109,19 @@ void Help(void);
 
 void RunFileTests(const char * const ptr_name_of_file, const bool visible_values);
 
-// main.cpp
+bool CheckOneSolve(const struct TestCase * const ptr_test, const bool visible_values);
+bool CheckTwoSolves(const struct TestCase * const ptr_test, const bool visible_values);
+bool CheckInfOrZeroSolves(const struct TestCase * const ptr_test, const bool visible_values);
+
+bool PrintSolve(const struct TestCase * const ptr_test, const struct EquationSolves * const ptr_solves, const bool visible_values, const bool right_solve);
+void SortDoubles(double * ptr_a, double * ptr_b);
+void PrintErrorValues(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves);
+void ErrorInCalc(void);
+
+#include "input_and_output.cpp"
+#include "solving.cpp"
+#include "testing.cpp"
+#include "support_functions.cpp"
 
 int main(int argc, char * argv[])
 {
@@ -130,437 +143,10 @@ int main(int argc, char * argv[])
     return 0;
 }
 
-// solving.cpp
-
-bool SolutionsOfEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves)
-{
-    assert(ptr_args != NULL);
-    assert(ptr_solves != NULL);
-
-    if (ComparisonOfFractalNumbers(ptr_args->a, 0.0) == EQUAL)
-    {
-        return SolutionsOfLinealEquations(ptr_args, ptr_solves);
-    }
-
-    else
-    {
-        return SolutionsOfQuadraticEquations(ptr_args, ptr_solves);
-    }
-}
-
-// support_functions.cpp
-
-int ComparisonOfFractalNumbers(const double a, const double b)
-{
-    if (a - b > EPS)
-    {
-        return BIGGER;
-    }
-
-    else if (a - b < -EPS)
-    {
-        return SMALLER;
-    }
-
-    else
-    {
-        return EQUAL;
-    }
-}
-
-// solving.cpp
-
-bool SolutionsOfQuadraticEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves)
-{
-    assert(ptr_args != NULL);
-    assert(ptr_solves != NULL);
-
-    double discriminant = ptr_args->b * ptr_args->b - 4 * ptr_args->a * ptr_args->c;
-
-    if (discriminant < 0)
-    {
-        ptr_solves->number_of_solves = ZERO_SOLVES;
-        return true;
-    }
-
-    else if (ComparisonOfFractalNumbers(discriminant, 0.0) == EQUAL)
-    {
-        ptr_solves->solve1 = (-ptr_args->b) / (2 * ptr_args->a);
-        ptr_solves->number_of_solves = ONE_SOLVE;
-
-        return CheckOneRoot(ptr_args, ptr_solves);
-    }
-
-    else
-    {
-        double sqrt_discriminant = sqrt(discriminant);
-
-        ptr_solves->solve1 = (-ptr_args->b - sqrt_discriminant) / (2 * ptr_args->a);
-        ptr_solves->solve2 = (-ptr_args->b + sqrt_discriminant) / (2 * ptr_args->a);
-        ptr_solves->number_of_solves = TWO_SOLVES;
-
-        return CheckTwoRoots(ptr_args, ptr_solves);
-    }
-}
-
-// solving.cpp
-
-bool SolutionsOfLinealEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves)
-{
-    assert(ptr_args != NULL);
-    assert(ptr_solves != NULL);
-
-    if (ComparisonOfFractalNumbers(ptr_args->b, 0.0) == EQUAL)
-    {
-        if (ComparisonOfFractalNumbers(ptr_args->c, 0.0) == EQUAL)
-        {
-            ptr_solves->number_of_solves = INF_SOLVES;
-            return true;
-        }
-
-        else
-        {
-            ptr_solves->number_of_solves = ZERO_SOLVES;
-            return true;
-        }
-    }
-
-    else
-    {
-        ptr_solves->solve1 = (-ptr_args->c) / ptr_args->b;
-        ptr_solves->number_of_solves = ONE_SOLVE;
-
-        return CheckOneRoot(ptr_args, ptr_solves);
-    }
-}
-
-// input_and_output.cpp
-
-int VerificationOfEnteredData(struct EquationArgs * const ptr_args)
-{
-    assert(ptr_args != NULL);
-    assert(CheckEquationErrors());
-
-    int number_of_scanned_args = scanf("%lf %lf %lf", &(ptr_args->a), &(ptr_args->b), &(ptr_args->c));
-
-    if (number_of_scanned_args == 3)
-    {
-        if (! CheckString())
-        {
-            number_of_scanned_args++;
-        }
-    }
-
-    return number_of_scanned_args; //количество возвращённых элементов равно коду ошибки
-}
-
-// input_and_output.cpp
-
-void PrintEnding(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves)
-{
-    assert(ptr_args != NULL);
-    assert(ptr_solves != NULL);
-
-    printf("У уравнения %.3lf * x^2 + %.3lf * x + %.3lf ", ptr_args->a, ptr_args->b, ptr_args->c);
-
-    switch (ptr_solves->number_of_solves)
-    {
-        case ZERO_SOLVES:
-            printf("нет решений.\n");
-            break;
-
-        case ONE_SOLVE:
-            printf("одно решение x = %.3lf.\n", ptr_solves->solve1);
-            break;
-
-        case TWO_SOLVES:
-            printf("два решения x1 = %.3lf и x2 = %.3lf.\n", ptr_solves->solve1, ptr_solves->solve2);
-            break;
-
-        case INF_SOLVES:
-            printf("бесконечное количество решений x - любое число.\n");
-            break;
-
-        default:
-            printf("произошла непредвиденная ситуация.\n");
-            break;
-    }
-}
-
-// input_and_output.cpp
-
-void Greetings(void)
-{
-    printf("Приветствую, пользователь.\nЯ программа, умеющая решать квадратные уравнения.\n"
-           "Введи 3 числа (сначала коэффициент при x^2, потом при x, потом свободный): ");
-}
-
-// input_and_output.cpp
-
-void InvalidInput(const int code_of_error, bool * ptr_need_to_continue)
-{
-    assert(ptr_need_to_continue != NULL);
-
-    if (code_of_error == ERROR_A || code_of_error == ERROR_B || code_of_error == ERROR_C)
-    {
-        printf("Аргумент %c введён неверно. Введите данные заново "
-               "(сначала коэффициент при x^2, потом при x, потом свободный): ", 'a' + code_of_error);
-        SkipString();
-    }
-
-    else if (code_of_error == ERROR_EOF)
-    {
-        printf("Конец файла.");
-        *ptr_need_to_continue = false;
-    }
-
-    else if (code_of_error == ERROR_SO_MANY)
-    {
-        printf("Введены лишние аргументы. Введите данные заново "
-               "(сначала коэффициент при x^2, потом при x, потом свободный): ");
-    }
-
-    else
-    {
-        printf("Произошла непредвиденная ошибка.\n");
-        *ptr_need_to_continue = false;
-    }
-}
-
-// input_and_output.cpp
-
-bool CheckString(void)
-{
-    int ch = 0;
-
-    while (isspace(ch = getchar()))
-    {
-        if (ch == '\n')
-        {
-            return true;
-        }
-    }
-
-    if (ch != CODE_OF_CTRL_Z && ch != EOF)
-    {
-        SkipString();
-    }
-
-    return false;
-}
-
-// input_and_output.cpp
-
-int ContinueOrStop(bool * ptr_need_to_continue)
-{
-    assert(ptr_need_to_continue != NULL);
-
-    int answer= 0;
-
-    printf("Хотите продолжить ввод (введите Y если да или N если нет): ");
-
-    while (1)
-    {
-        while (isspace(answer = getchar()))
-        {
-            continue;
-        }
-
-        if (answer == 'Y')
-        {
-            if (CheckString())
-            {
-                printf("Введи 3 числа (сначала коэффициент при x^2, потом при x, потом свободный): ");
-                return 0;
-            }
-        }
-
-        else if (answer == 'N')
-        {
-            if (CheckString())
-            {
-                printf("Спасибо, что пользовались моей программой.");
-                *ptr_need_to_continue = false;
-                return 0;
-            }
-        }
-
-        InvalidAnswer();
-    }
-}
-
-// solving.cpp
-
-bool CheckTwoRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves)
-{
-    assert(ptr_args != NULL);
-    assert(ptr_solves != NULL);
-
-    double value1 = ptr_args->a * ptr_solves->solve1 * ptr_solves->solve1 + ptr_args->b * ptr_solves->solve1 + ptr_args->c;
-    double value2 = ptr_args->a * ptr_solves->solve2 * ptr_solves->solve2 + ptr_args->b * ptr_solves->solve2 + ptr_args->c;
-
-    if (ComparisonOfFractalNumbers(value1, 0.0) != EQUAL || ComparisonOfFractalNumbers(value2, 0.0) != EQUAL)
-    {
-        printf("Произошла ошибка в вычислениях.\n");
-        printf("a = %lf, b = %lf, c = %lf, x1 = %lf, x2 = %lf.\n", ptr_args->a, ptr_args->b, ptr_args->c, ptr_solves->solve1, ptr_solves->solve2);
-
-        return false;
-    }
-
-    return true;
-}
-
-// solving.cpp
-
-bool CheckOneRoot(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves)
-{
-    assert(ptr_args != NULL);
-    assert(ptr_solves != NULL);
-
-    double value = ptr_args->a * ptr_solves->solve1 * ptr_solves->solve1 + ptr_args->b * ptr_solves->solve1 + ptr_args->c;
-
-    if (ComparisonOfFractalNumbers(value, 0.0) != EQUAL)
-    {
-        printf("Произошла ошибка в вычислениях.\n");
-        printf("b = %lf, c = %lf, x = %lf.\n", ptr_args->b, ptr_args->c, ptr_solves->solve1);
-
-        return false;
-    }
-
-    return true;
-}
-
-// input_and_output.cpp
-
-void InvalidAnswer(void)
-{
-    printf("Принимаются только ответы Y/N (введите Y если да или N если нет): ");
-}
-
-// support_functions.cpp
-
-bool CheckEquationErrors(void)
-{
-    return (ERROR_EOF == -1 && ERROR_A == 0 && ERROR_B == 1 && ERROR_C == 2 && NO_ERRORS == 3 && ERROR_SO_MANY == 4 && UNEXPECTED_ERROR == 5);
-}
-
-// input_and_output.cpp
-
-void SkipString(void)
-{
-    int ch = 0;
-
-    while ((ch = getchar()) != CODE_OF_CTRL_Z && ch != '\n' && ch != EOF)
-    {
-        continue;
-    }
-}
-
-// input_and_output.cpp
-
-void TestModeGreetings(void)
-{
-    printf("Начинаю unit-тестирование модуля SolutionsOfEquations.\n");
-}
-
-// testing.cpp
-
-void RunTests(const int number_of_random_tests, const bool visible_values)
-{
-    if (visible_values)
-    {
-        printf("\nНачинаю прохождение заданных тестов.\n\n");
-    }
-
-    int success_special_tests = RunSpecialTests(visible_values);
-
-    if (visible_values)
-    {
-        printf("\nНачинаю прохождение рандомных тестов.\n\n");
-    }
-
-    int success_random_tests = RunRandomTests(number_of_random_tests, visible_values);
-
-    printf("\nТестирование окончено. Пройдено %d/%d заданных тестов и %d/%d рандомных тестов.\n",
-        success_special_tests, sizeof (SPECIAL_TESTS_VALUES) / sizeof (TestCase), success_random_tests, number_of_random_tests);
-}
-
-// input_and_output.cpp
-
-void InvalidCommand(void)
-{
-    printf("Ошибка в аргументах командной строки. Для получения помощи в использовании программы введите \n"
-           "name_of_file --help в командную строку\n");
-}
-
-// testing.cpp
-
-int RunSpecialTests(const bool visible_values)
-{
-    int success_special_tests = 0;
-
-    for (size_t iteration = 0; iteration < sizeof (SPECIAL_TESTS_VALUES) / sizeof (TestCase); iteration++)
-    {
-        if (RunOneTest(&SPECIAL_TESTS_VALUES[iteration], visible_values))
-        {
-            success_special_tests++;
-        }
-
-        else
-        {
-            printf("Произошла ошибка в вычислениях на %d тесте.\n", iteration+1);
-        }
-    }
-
-    return success_special_tests;
-}
-
-// testing.cpp
-
-int RunRandomTests(const int number_of_random_tests, const bool visible_values)
-{
-    struct EquationArgs args = { };
-    struct EquationSolves solves = { };
-
-    int success_random_tests = 0;
-
-    for (int iteration = 0; iteration < number_of_random_tests; iteration++)
-    {
-        args = {.a = (RAND_MAX / 2 - rand()) / ACCURACY, .b = (RAND_MAX / 2 - rand()) / ACCURACY, .c = (RAND_MAX / 2 - rand()) / ACCURACY};
-
-        solves = { };
-
-        if (SolutionsOfEquations(&args, &solves))
-        {
-            success_random_tests++;
-        }
-
-        PrintValues(&args, &solves, visible_values);
-    }
-
-    return success_random_tests;
-}
-
-// input_and_output.cpp
-
-void PrintValues(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves, const bool visible_values)
-{
-    assert(ptr_args != NULL);
-    assert(ptr_solves != NULL);
-
-    if (visible_values)
-    {
-        printf("a = %7.3lf, b = %7.3lf, c = %7.3lf, number_of_solves = %d, x1 = %7.3lf, x2 = %7.3lf\n",
-         ptr_args->a, ptr_args->b, ptr_args->c, ptr_solves->number_of_solves, ptr_solves->solve1, ptr_solves->solve2);
-    }
-}
-
-// main.cpp
-
 void ClientProgram()
 {
     struct EquationArgs args = { };
-    struct EquationSolves solves = { };
+    struct EquationSolves solves = {.solve1 = NAN, .solve2 = NAN};
 
     Greetings();
 
@@ -585,8 +171,6 @@ void ClientProgram()
         }
     }
 }
-
-// main.cpp
 
 void TestingProgram(const int argc, char * argv[])
 {
@@ -631,105 +215,3 @@ void TestingProgram(const int argc, char * argv[])
         RunTests(number_of_random_tests, visible_values);
     }
 }
-
-// testing.cpp
-
-bool RunOneTest(const struct TestCase * const ptr_test, const bool visible_values)
-{
-    assert(ptr_test != NULL);
-
-    struct EquationSolves solves = { };
-
-    SolutionsOfEquations(&(ptr_test->args), &solves);
-
-    double solve1 = solves.solve1;
-    double solve2 = solves.solve2;
-
-    double support_for_swap = 0;
-
-    double reference_solve1 = (ptr_test->reference_solves).solve1;
-    double reference_solve2 = (ptr_test->reference_solves).solve2;
-
-    if (ComparisonOfFractalNumbers(solve1, solve2) == SMALLER)
-    {
-        support_for_swap = solve1;
-        solve1 = solve2;
-        solve2 = support_for_swap;
-    }
-
-    if (ComparisonOfFractalNumbers(reference_solve1, reference_solve2) == SMALLER)
-    {
-        support_for_swap = reference_solve1;
-        reference_solve1 = reference_solve2;
-        reference_solve2 = support_for_swap;
-    }
-
-    if (solves.number_of_solves != (ptr_test->reference_solves).number_of_solves ||
-    ComparisonOfFractalNumbers(solve1, reference_solve1) != EQUAL  ComparisonOfFractalNumbers(solve2, reference_solve2) != EQUAL))
-    {
-        printf("Произошла ошибка в вычислениях.\n");
-
-        printf("a = %.3lf, b = %.3lf, c = %.3lf, number_of_solves = %d, x1 = %.3lf, x2 = %.3lf.\n",
-        (ptr_test->args).a, (ptr_test->args).b, (ptr_test->args).c, solves.number_of_solves, solve1, solve2);
-
-        printf("number_of_solves_ref = %d, x1_ref = %.3lf, x2_ref = %.3lf\n", (ptr_test->reference_solves).number_of_solves, reference_solve1, reference_solve2);
-
-        return false;
-    }
-
-    else
-    {
-        PrintValues(&(ptr_test->args), &solves, visible_values);
-        return true;
-    }
-}
-
-// input_and_output.cpp
-
-void Help(void)
-{
-    printf("У программы есть 2 режима: тестирование и взаимодействие с пользователем.\n");
-    printf("Для режима тестирования надо ввести определённые аргументы в командную строку. Вот пример правильного ввода:\n"
-           "name_of_file test number_of_random_tests (по умолчанию 1000, можно задать"
-           " своё значение) -v (вывод проверяемых аргументов, без флага не выводятся)\n");
-    printf("Также можно подключить тесты из файла, для этого надо ввести флаг -f и написать название файла с тестами (по умолчанию test.txt)\n");
-    printf("В остальных случаях запустится режим взаимодействия с пользователем.\n");
-}
-
-// testing.cpp
-
-void RunFileTests(const char * const ptr_name_of_file, const bool visible_values)
-{
-    assert(ptr_name_of_file != NULL);
-
-    FILE * ptr_test_file = NULL;
-
-    int iteration = 0;
-    int success_file_tests = 0;
-
-    ptr_test_file = fopen(ptr_name_of_file, "r");
-
-    assert(ptr_test_file != NULL);
-
-    struct TestCase test = { };
-
-    while (fscanf(ptr_test_file, "%lf %lf %lf %d %lf %lf", &(test.args.a), &(test.args.b), &(test.args.c),
-    &(test.reference_solves.number_of_solves), &(test.reference_solves.solve1), &(test.reference_solves.solve2)) == 6)
-    {
-        iteration++;
-
-        if (RunOneTest(&test, visible_values))
-        {
-            success_file_tests++;
-        }
-
-        else
-        {
-            printf("Произошла ошибка в вычислениях на %d тесте.\n", iteration);
-        }
-    }
-
-    printf("Конец файла. Тестирование окончено. Пройдено %d/%d тестов.\n", success_file_tests, iteration);;
-}
-
-// TODO: разбить на файлы для удобства в ориентировании по проекту
