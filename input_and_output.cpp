@@ -19,7 +19,7 @@ void Help(void)
     printf("В остальных случаях запустится режим взаимодействия с пользователем.\n");
 }
 
-int VerificationOfEnteredData(struct EquationArgs * const ptr_args)
+int VerificationOfEnteredData(EquationArgs * const ptr_args)
 {
     assert(ptr_args != NULL);
     assert(CheckEquationErrors());
@@ -37,7 +37,7 @@ int VerificationOfEnteredData(struct EquationArgs * const ptr_args)
     return number_of_scanned_args; //количество возвращённых элементов равно коду ошибки
 }
 
-void PrintEnding(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves)
+void PrintEnding(const EquationArgs * const ptr_args, const EquationSolves * const ptr_solves)
 {
     assert(ptr_args != NULL);
     assert(ptr_solves != NULL);
@@ -106,7 +106,7 @@ int ContinueOrStop(bool * ptr_need_to_continue)
     }
 }
 
-void PrintValues(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves, const bool visible_values)
+void PrintValues(const EquationArgs * const ptr_args, const EquationSolves * const ptr_solves, const bool visible_values)
 {
     assert(ptr_args != NULL);
     assert(ptr_solves != NULL);
@@ -118,7 +118,7 @@ void PrintValues(const struct EquationArgs * const ptr_args, const struct Equati
     }
 }
 
-bool PrintSolve(const struct TestCase * const ptr_test, const struct EquationSolves * const ptr_solves, const bool visible_values, const bool right_solve)
+bool PrintSolve(const TestCase * const ptr_test, const EquationSolves * const ptr_solves, const bool visible_values, const bool right_solve)
 {
     if (right_solve)
     {
@@ -169,7 +169,7 @@ void InvalidInput(const int code_of_error, bool * ptr_need_to_continue)
     }
 }
 
-void PrintErrorValues(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves)
+void PrintErrorValues(const EquationArgs * const ptr_args, const EquationSolves * const ptr_solves)
 {
     ErrorInCalc();
     printf("a = %.3lf, b = %.3lf, c = %.3lf, number_of_solves = %d, x1 = %.3lf, x2 = %.3lf.\n",
@@ -190,4 +190,9 @@ void InvalidCommand(void)
 void ErrorInCalc(void)
 {
     printf("Произошла ошибка в вычислениях.\n");
+}
+
+void PrintErrComandArgs(void)
+{
+    printf("Аргументы командной строки введены неверно. Для получения помощи в пользовании программой введите флаг --help при запуске.\n");
 }

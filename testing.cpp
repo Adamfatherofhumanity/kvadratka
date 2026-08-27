@@ -14,7 +14,7 @@ void RunTests(const int number_of_random_tests, const bool visible_values)
 
     int success_random_tests = RunRandomTests(number_of_random_tests, visible_values);
 
-    printf("\nТестирование окончено. Пройдено %d/%d заданных тестов и %d/%d рандомных тестов.\n",
+    printf("\nТестирование окончено. Пройдено %d/%zu заданных тестов и %d/%d рандомных тестов.\n",
         success_special_tests, sizeof (SPECIAL_TESTS_VALUES) / sizeof (TestCase), success_random_tests, number_of_random_tests);
 }
 
@@ -30,7 +30,7 @@ void RunFileTests(const char * const ptr_name_of_file, const bool visible_values
     ptr_test_file = fopen(ptr_name_of_file, "r");
     assert(ptr_test_file != NULL);
 
-    struct TestCase test = { };
+    TestCase test = { };
 
     while (fscanf(ptr_test_file, "%lf %lf %lf %d %lf %lf", &(test.args.a), &(test.args.b), &(test.args.c),
     &(test.reference_solves.number_of_solves), &(test.reference_solves.solve1), &(test.reference_solves.solve2)) == 6)
@@ -64,7 +64,7 @@ int RunSpecialTests(const bool visible_values)
 
         else
         {
-            printf("Произошла ошибка в вычислениях на %d тесте.\n", iteration+1);
+            printf("Произошла ошибка в вычислениях на %zu тесте.\n", iteration+1);
         }
     }
 
@@ -73,12 +73,12 @@ int RunSpecialTests(const bool visible_values)
 
 int RunRandomTests(const int number_of_random_tests, const bool visible_values)
 {
-    struct EquationArgs args = { };
-    struct EquationSolves solves = {.solve1 = NAN, .solve2 = NAN};
+    EquationArgs args = { };
+    EquationSolves solves = {.solve1 = NAN, .solve2 = NAN};
 
     int success_random_tests = 0;
 
-    for (int iteration = 0; iteration < number_of_random_tests; iteration++)
+    for (size_t iteration = 0; iteration < size_t (number_of_random_tests); iteration++)
     {
         args = {.a = (RAND_MAX / 2 - rand()) / ACCURACY, .b = (RAND_MAX / 2 - rand()) / ACCURACY, .c = (RAND_MAX / 2 - rand()) / ACCURACY};
 
@@ -95,7 +95,7 @@ int RunRandomTests(const int number_of_random_tests, const bool visible_values)
     return success_random_tests;
 }
 
-bool RunOneTest(const struct TestCase * const ptr_test, const bool visible_values)
+bool RunOneTest(const TestCase * const ptr_test, const bool visible_values)
 {
     assert(ptr_test != NULL);
 
@@ -115,11 +115,11 @@ bool RunOneTest(const struct TestCase * const ptr_test, const bool visible_value
     }
 }
 
-bool CheckInfOrZeroSolves(const struct TestCase * const ptr_test, const bool visible_values)
+bool CheckInfOrZeroSolves(const TestCase * const ptr_test, const bool visible_values)
 {
     assert(ptr_test != NULL);
 
-    struct EquationSolves solves = {.solve1 = NAN, .solve2 = NAN};
+    EquationSolves solves = {.solve1 = NAN, .solve2 = NAN};
 
     SolutionsOfEquations(&(ptr_test->args), &solves);
 
@@ -128,11 +128,11 @@ bool CheckInfOrZeroSolves(const struct TestCase * const ptr_test, const bool vis
     return PrintSolve(ptr_test, &solves, visible_values, right_solve);
 }
 
-bool CheckTwoSolves(const struct TestCase * const ptr_test, const bool visible_values)
+bool CheckTwoSolves(const TestCase * const ptr_test, const bool visible_values)
 {
     assert(ptr_test != NULL);
 
-    struct EquationSolves solves = {.solve1 = NAN, .solve2 = NAN};
+    EquationSolves solves = {.solve1 = NAN, .solve2 = NAN};
 
     SolutionsOfEquations(&(ptr_test->args), &solves);
 
@@ -150,11 +150,11 @@ bool CheckTwoSolves(const struct TestCase * const ptr_test, const bool visible_v
     return PrintSolve(ptr_test, &solves, visible_values, right_solve);
 }
 
-bool CheckOneSolve(const struct TestCase * const ptr_test, const bool visible_values)
+bool CheckOneSolve(const TestCase * const ptr_test, const bool visible_values)
 {
     assert(ptr_test != NULL);
 
-    struct EquationSolves solves = {.solve1 = NAN, .solve2 = NAN};
+    EquationSolves solves = {.solve1 = NAN, .solve2 = NAN};
 
     SolutionsOfEquations(&(ptr_test->args), &solves);
 

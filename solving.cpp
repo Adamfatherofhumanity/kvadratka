@@ -1,4 +1,4 @@
-bool SolutionsOfEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves)
+bool SolutionsOfEquations(const EquationArgs * const ptr_args, EquationSolves * const ptr_solves)
 {
     assert(ptr_args != NULL);
     assert(ptr_solves != NULL);
@@ -14,7 +14,7 @@ bool SolutionsOfEquations(const struct EquationArgs * const ptr_args, struct Equ
     }
 }
 
-bool SolutionsOfQuadraticEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves)
+bool SolutionsOfQuadraticEquations(const EquationArgs * const ptr_args, EquationSolves * const ptr_solves)
 {
     assert(ptr_args != NULL);
     assert(ptr_solves != NULL);
@@ -47,7 +47,7 @@ bool SolutionsOfQuadraticEquations(const struct EquationArgs * const ptr_args, s
     }
 }
 
-bool SolutionsOfLinealEquations(const struct EquationArgs * const ptr_args, struct EquationSolves * const ptr_solves)
+bool SolutionsOfLinealEquations(const EquationArgs * const ptr_args, EquationSolves * const ptr_solves)
 {
     assert(ptr_args != NULL);
     assert(ptr_solves != NULL);
@@ -76,7 +76,7 @@ bool SolutionsOfLinealEquations(const struct EquationArgs * const ptr_args, stru
     }
 }
 
-bool CheckTwoRoots(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves)
+bool CheckTwoRoots(const EquationArgs * const ptr_args, const EquationSolves * const ptr_solves)
 {
     assert(ptr_args != NULL);
     assert(ptr_solves != NULL);
@@ -93,7 +93,7 @@ bool CheckTwoRoots(const struct EquationArgs * const ptr_args, const struct Equa
     return true;
 }
 
-bool CheckOneRoot(const struct EquationArgs * const ptr_args, const struct EquationSolves * const ptr_solves)
+bool CheckOneRoot(const EquationArgs * const ptr_args, const EquationSolves * const ptr_solves)
 {
     assert(ptr_args != NULL);
     assert(ptr_solves != NULL);
