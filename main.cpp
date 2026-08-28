@@ -6,127 +6,39 @@
 #include <math.h>
 #include <string.h>
 
-const double EPS = 1e-6;
-
-const int MINIMUM_ARGS_FOR_TEST = 2;
-const int MAXIMUM_ARGS_FOR_TEST = 5;
-const int ARGS_FOR_CLIENT_MODE = 1;
-
-const int DEFAULT_NUMBER_OF_RANDOM_TESTS = 1000;
-const double ACCURACY = 1000;
-const int NUMBER_OF_ARGS = 3;
-
-const int ARGC_FOR_HELP = 2;
-
-const char DEFAULT_NAME_OF_FILE[] = "test.txt";
-
-const int CODE_OF_CTRL_Z = 26;
-
-enum Comparison
-{
-    BIGGER = 1,
-    SMALLER = -1,
-    EQUAL = 0
-};
-
-enum Solves
-{
-    INF_SOLVES = 3,
-    ZERO_SOLVES = 0,
-    ONE_SOLVE = 1,
-    TWO_SOLVES = 2
-};
-
-enum EquationErrors
-{
-    ERROR_EOF = -1,
-    ERROR_A = 0,
-    ERROR_B = 1,
-    ERROR_C = 2,
-    NO_ERRORS = 3,
-    ERROR_SO_MANY = 4,
-    UNEXPECTED_ERROR = 5
-};
-
-struct EquationArgs
-{
-    double a;
-    double b;
-    double c;
-};
-
-struct EquationSolves
-{
-    double solve1;
-    double solve2;
-    int number_of_solves;
-};
-
-struct TestCase
-{
-    EquationArgs args;
-    EquationSolves reference_solves;
-};
-
-const TestCase SPECIAL_TESTS_VALUES[] = {{{.a = 0, .b = 0, .c = 0}, {.solve1 = NAN, .solve2 = NAN, .number_of_solves = INF_SOLVES}},
-                                         {{.a = 0, .b = 0, .c = 1}, {.solve1 = NAN, .solve2 = NAN, .number_of_solves = ZERO_SOLVES}},
-                                         {{.a = 0, .b = 1, .c = 1}, {.solve1 = -1, .solve2 = NAN, .number_of_solves = ONE_SOLVE}},
-                                         {{.a = 1, .b = 1, .c = 1}, {.solve1 = NAN, .solve2 = NAN, .number_of_solves = ZERO_SOLVES}},
-                                         {{.a = 1, .b = 2, .c = 1}, {.solve1 = -1, .solve2 = NAN, .number_of_solves = ONE_SOLVE}},
-                                         {{.a = 1, .b = 5, .c = 6}, {.solve1 = -2, .solve2 = -3, .number_of_solves = TWO_SOLVES}}};
-
-int ComparisonOfFractalNumbers(const double a, const double b);
-
-bool SolutionsOfEquations(const EquationArgs * const ptr_args, EquationSolves * const ptr_solves);
-bool SolutionsOfQuadraticEquations(const EquationArgs * const ptr_args, EquationSolves * const ptr_solves);
-bool SolutionsOfLinealEquations(const EquationArgs * const ptr_args, EquationSolves * const ptr_solves);
-
-int VerificationOfEnteredData(EquationArgs * const ptr_args);
-void InvalidInput(const int code_of_error, bool * ptr_need_to_continue);
-void InvalidAnswer(void);
-bool CheckString(void);
-
-void Greetings(void);
-void PrintEnding(const EquationArgs * const ptr_args, const EquationSolves * const ptr_solves);
-int ContinueOrStop(bool * ptr_need_to_continue);
-
-bool CheckTwoRoots(const EquationArgs * const ptr_args, const EquationSolves * const ptr_solves);
-bool CheckOneRoot(const EquationArgs * const ptr_args, const EquationSolves * const ptr_solves);
-bool CheckEquationErrors(void);
-
-void SkipString(void);
-
-void RunTests(const int number_of_random_tests, const bool visible_values);
-int RunSpecialTests(const bool visible_values);
-int RunRandomTests(const int number_of_random_tests, const bool visible_values);
-bool RunOneTest(const TestCase * const ptr_test, const bool visible_values);
-
-void TestModeGreetings(void);
-void InvalidCommand(void);
-void PrintValues(const EquationArgs * const ptr_args, const EquationSolves * const ptr_solves, const bool visible_values);
-
-void ClientProgram();
-void TestingProgram(const int argc, char * argv[]);
-
-void Help(void);
-void PrintErrComandArgs(void);
-
-void RunFileTests(const char * const ptr_name_of_file, const bool visible_values);
-
-bool CheckOneSolve(const TestCase * const ptr_test, const bool visible_values);
-bool CheckTwoSolves(const TestCase * const ptr_test, const bool visible_values);
-bool CheckInfOrZeroSolves(const TestCase * const ptr_test, const bool visible_values);
-
-bool PrintSolve(const TestCase * const ptr_test, const EquationSolves * const ptr_solves, const bool visible_values, const bool right_solve);
-void SortDoubles(double * ptr_a, double * ptr_b);
-void PrintErrorValues(const EquationArgs * const ptr_args, const EquationSolves * const ptr_solves);
-void ErrorInCalc(void);
+#include "consts.h"
+#include "input_and_output.h"
+#include "solving.h"
+#include "testing.h"
+#include "support_functions.h"
 
 #include "input_and_output.cpp"
 #include "solving.cpp"
 #include "testing.cpp"
 #include "support_functions.cpp"
 
+/// @ingroup kvadratka
+/**
+ * @brief interacts with the user
+ */
+void ClientProgram();
+
+/// @ingroup kvadratka
+/**
+ * @brief test mode
+ *
+ * @param[in] argc number of command-line arguments
+ * @param[in] argv pointer to an array of command-line arguments
+ */
+void TestingProgram(const int argc, char * argv[]);
+
+/**
+ * @brief the main function with which the program begins
+ *
+ * @param argc number of command-line arguments
+ * @param argv pointer to an array of command-line arguments
+ * @return int 0
+ */
 int main(int argc, char * argv[])
 {
     if (argc == ARGC_FOR_HELP && strcmp(argv[ARGC_FOR_HELP-1], "--help") == 0)
@@ -134,19 +46,19 @@ int main(int argc, char * argv[])
         Help();
     }
 
-    else if (argc >= MINIMUM_ARGS_FOR_TEST && argc <= MAXIMUM_ARGS_FOR_TEST && strcmp(argv[MINIMUM_ARGS_FOR_TEST-1], "test") == 0)
+    else if (argc >= MINIMUM_ARGC_FOR_TEST && argc <= MAXIMUM_ARGC_FOR_TEST && strcmp(argv[MINIMUM_ARGC_FOR_TEST-1], "test") == 0)
     {
         TestingProgram(argc, argv);
     }
 
-    else if (argc == ARGS_FOR_CLIENT_MODE)
+    else if (argc == ARGC_FOR_CLIENT_MODE)
     {
         ClientProgram();
     }
 
     else
     {
-        PrintErrComandArgs();
+        InvalidCommand();
     }
 
     return 0;
@@ -190,7 +102,7 @@ void TestingProgram(const int argc, char * argv[])
     bool file_testing = false;
     const char * ptr_name_of_file = DEFAULT_NAME_OF_FILE;
 
-    for (size_t number_of_arg = MINIMUM_ARGS_FOR_TEST; number_of_arg < size_t (argc); number_of_arg++)
+    for (size_t number_of_arg = MINIMUM_ARGC_FOR_TEST; number_of_arg < size_t (argc); number_of_arg++)
     {
         if (strcmp(argv[number_of_arg], "-f") == 0)
         {

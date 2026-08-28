@@ -28,9 +28,27 @@ void SortDoubles(double * ptr_a, double * ptr_b)
     }
 }
 
-bool CheckEquationErrors(void)
+double RandDouble(void)
 {
-    return (ERROR_EOF == -1 && ERROR_A == 0 && ERROR_B == 1 && ERROR_C == 2 && NO_ERRORS == 3 && ERROR_SO_MANY == 4 && UNEXPECTED_ERROR == 5);
+    return (RAND_MAX / 2 - rand()) / ACCURACY;
+}
+
+double CalcValueOfQuadraticEq(const EquationArgs * const ptr_args, const double solve)
+{
+    return ptr_args->a * solve * solve + ptr_args->b * solve + ptr_args->c;
+}
+
+void ZeroProblemSolve(EquationSolves * const ptr_solves)
+{
+    if ((!isnan(ptr_solves->solve1)) && ComparisonOfFractalNumbers(ptr_solves->solve1, 0.0) == EQUAL)
+    {
+        ptr_solves->solve1 = 0;
+    }
+
+    if ((!isnan(ptr_solves->solve2)) && ComparisonOfFractalNumbers(ptr_solves->solve2, 0.0) == EQUAL)
+    {
+        ptr_solves->solve2 = 0;
+    }
 }
 
 bool CheckString(void)

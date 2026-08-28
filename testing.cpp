@@ -32,8 +32,11 @@ void RunFileTests(const char * const ptr_name_of_file, const bool visible_values
 
     TestCase test = { };
 
-    while (fscanf(ptr_test_file, "%lf %lf %lf %d %lf %lf", &(test.args.a), &(test.args.b), &(test.args.c),
-    &(test.reference_solves.number_of_solves), &(test.reference_solves.solve1), &(test.reference_solves.solve2)) == 6)
+    EquationArgs * const ptr_args = &test.args;
+    EquationSolves * const ptr_reference_solves = &test.reference_solves;
+
+    while (fscanf(ptr_test_file, "%lf %lf %lf %d %lf %lf", &(ptr_args->a), &(ptr_args->b), &(ptr_args->c),
+    &(ptr_reference_solves->number_of_solves), &(ptr_reference_solves->solve1), &(ptr_reference_solves->solve2)) == 6)
     {
         iteration++;
 
@@ -80,7 +83,7 @@ int RunRandomTests(const int number_of_random_tests, const bool visible_values)
 
     for (size_t iteration = 0; iteration < size_t (number_of_random_tests); iteration++)
     {
-        args = {.a = (RAND_MAX / 2 - rand()) / ACCURACY, .b = (RAND_MAX / 2 - rand()) / ACCURACY, .c = (RAND_MAX / 2 - rand()) / ACCURACY};
+        args = {.a = RandDouble(), .b = RandDouble(), .c = RandDouble()};
 
         solves = {.solve1 = NAN, .solve2 = NAN};
 
@@ -99,12 +102,14 @@ bool RunOneTest(const TestCase * const ptr_test, const bool visible_values)
 {
     assert(ptr_test != NULL);
 
-    if ((ptr_test->reference_solves).number_of_solves == TWO_SOLVES)
+    int ref_number_of_solves = (ptr_test->reference_solves).number_of_solves;
+
+    if (ref_number_of_solves == TWO_SOLVES)
     {
         return CheckTwoSolves(ptr_test, visible_values);
     }
 
-    else if ((ptr_test->reference_solves).number_of_solves == ONE_SOLVE)
+    else if (ref_number_of_solves == ONE_SOLVE)
     {
         return CheckOneSolve(ptr_test, visible_values);
     }
@@ -123,9 +128,9 @@ bool CheckInfOrZeroSolves(const TestCase * const ptr_test, const bool visible_va
 
     SolutionsOfEquations(&(ptr_test->args), &solves);
 
-    bool right_solve = solves.number_of_solves != (ptr_test->reference_solves).number_of_solves;
+    bool false_solve = solves.number_of_solves != (ptr_test->reference_solves).number_of_solves;
 
-    return PrintSolve(ptr_test, &solves, visible_values, right_solve);
+    return PrintSolve(ptr_test, &solves, visible_values, false_solve);
 }
 
 bool CheckTwoSolves(const TestCase * const ptr_test, const bool visible_values)
@@ -133,21 +138,22 @@ bool CheckTwoSolves(const TestCase * const ptr_test, const bool visible_values)
     assert(ptr_test != NULL);
 
     EquationSolves solves = {.solve1 = NAN, .solve2 = NAN};
+    const EquationSolves * const ptr_reference_solves = &(ptr_test->reference_solves);
 
     SolutionsOfEquations(&(ptr_test->args), &solves);
 
     double solve1 = solves.solve1;
     double solve2 = solves.solve2;
-    double reference_solve1 = (ptr_test->reference_solves).solve1;
-    double reference_solve2 = (ptr_test->reference_solves).solve2;
+    double reference_solve1 = ptr_reference_solves->solve1;
+    double reference_solve2 = ptr_reference_solves->solve2;
 
     SortDoubles(&solve1, &solve2);
     SortDoubles(&reference_solve1, &reference_solve2);
 
-    bool right_solve = solves.number_of_solves != (ptr_test->reference_solves).number_of_solves
+    bool false_solve = solves.number_of_solves != ptr_reference_solves->number_of_solves
     || ComparisonOfFractalNumbers(solve1, reference_solve1) != EQUAL || ComparisonOfFractalNumbers(solve2, reference_solve2) != EQUAL;
 
-    return PrintSolve(ptr_test, &solves, visible_values, right_solve);
+    return PrintSolve(ptr_test, &solves, visible_values, false_solve);
 }
 
 bool CheckOneSolve(const TestCase * const ptr_test, const bool visible_values)
@@ -155,11 +161,13 @@ bool CheckOneSolve(const TestCase * const ptr_test, const bool visible_values)
     assert(ptr_test != NULL);
 
     EquationSolves solves = {.solve1 = NAN, .solve2 = NAN};
+    const EquationSolves * const ptr_reference_solves = &(ptr_test->reference_solves);
+
 
     SolutionsOfEquations(&(ptr_test->args), &solves);
 
-    bool right_solve = solves.number_of_solves != (ptr_test->reference_solves).number_of_solves
-    || ComparisonOfFractalNumbers(solves.solve1, (ptr_test->reference_solves).solve1) != EQUAL;
+    bool false_solve = solves.number_of_solves != ptr_reference_solves->number_of_solves
+    || ComparisonOfFractalNumbers(solves.solve1, ptr_reference_solves->solve1) != EQUAL;
 
-    return PrintSolve(ptr_test, &solves, visible_values, right_solve);
+    return PrintSolve(ptr_test, &solves, visible_values, false_solve);
 }
