@@ -22,36 +22,42 @@ void RunFileTests(const char * const ptr_name_of_file, const bool visible_values
 {
     assert(ptr_name_of_file != NULL);
 
-    FILE * ptr_test_file = NULL;
-
     int iteration = 0;
     int success_file_tests = 0;
 
+    FILE * ptr_test_file = NULL;
     ptr_test_file = fopen(ptr_name_of_file, "r");
-    assert(ptr_test_file != NULL);
 
-    TestCase test = { };
-
-    EquationArgs * const ptr_args = &test.args;
-    EquationSolves * const ptr_reference_solves = &test.reference_solves;
-
-    while (fscanf(ptr_test_file, "%lf %lf %lf %d %lf %lf", &(ptr_args->a), &(ptr_args->b), &(ptr_args->c),
-    &(ptr_reference_solves->number_of_solves), &(ptr_reference_solves->solve1), &(ptr_reference_solves->solve2)) == 6)
+    if (ptr_test_file != NULL)
     {
-        iteration++;
+        TestCase test = { };
 
-        if (RunOneTest(&test, visible_values))
+        EquationArgs * const ptr_args = &test.args;
+        EquationSolves * const ptr_reference_solves = &test.reference_solves;
+
+        while (fscanf(ptr_test_file, "%lf %lf %lf %d %lf %lf", &(ptr_args->a), &(ptr_args->b), &(ptr_args->c),
+        &(ptr_reference_solves->number_of_solves), &(ptr_reference_solves->solve1), &(ptr_reference_solves->solve2)) == 6)
         {
-            success_file_tests++;
+            iteration++;
+
+            if (RunOneTest(&test, visible_values))
+            {
+                success_file_tests++;
+            }
+
+            else
+            {
+                printf("Произошла ошибка в вычислениях на %d тесте.\n", iteration);
+            }
         }
 
-        else
-        {
-            printf("Произошла ошибка в вычислениях на %d тесте.\n", iteration);
-        }
+        printf("Конец файла. Тестирование окончено. Пройдено %d/%d тестов.\n", success_file_tests, iteration);
     }
 
-    printf("Конец файла. Тестирование окончено. Пройдено %d/%d тестов.\n", success_file_tests, iteration);;
+    else
+    {
+        printf("Не удалось открыть файл %s.\n", ptr_name_of_file);
+    }
 }
 
 int RunSpecialTests(const bool visible_values)

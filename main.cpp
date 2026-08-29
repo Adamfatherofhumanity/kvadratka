@@ -41,24 +41,32 @@ void TestingProgram(const int argc, char * argv[]);
  */
 int main(int argc, char * argv[])
 {
-    if (argc == ARGC_FOR_HELP && strcmp(argv[ARGC_FOR_HELP-1], "--help") == 0)
+    if (argv != NULL)
     {
-        Help();
-    }
+        if (argc == ARGC_FOR_HELP && strcmp(argv[ARGC_FOR_HELP-1], "--help") == 0)
+        {
+            Help();
+        }
 
-    else if (argc >= MINIMUM_ARGC_FOR_TEST && argc <= MAXIMUM_ARGC_FOR_TEST && strcmp(argv[MINIMUM_ARGC_FOR_TEST-1], "test") == 0)
-    {
-        TestingProgram(argc, argv);
-    }
+        else if (argc >= MINIMUM_ARGC_FOR_TEST && argc <= MAXIMUM_ARGC_FOR_TEST && strcmp(argv[MINIMUM_ARGC_FOR_TEST-1], "test") == 0)
+        {
+            TestingProgram(argc, argv);
+        }
 
-    else if (argc == ARGC_FOR_CLIENT_MODE)
-    {
-        ClientProgram();
+        else if (argc == ARGC_FOR_CLIENT_MODE)
+        {
+            ClientProgram();
+        }
+
+        else
+        {
+            InvalidCommand();
+        }
     }
 
     else
     {
-        InvalidCommand();
+        printf("Ошибка в считывании аргументов командной строки.\n");
     }
 
     return 0;
