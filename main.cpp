@@ -17,69 +17,69 @@
 #include "testing.cpp"
 #include "support_functions.cpp"
 
-/// @ingroup kvadratka
+/// @defgroup kvadratka_modes
+/// @ingroup kvadratka_modes
+/// @{
 /**
  * @brief interacts with the user
  */
 void ClientProgram();
 
-/// @ingroup kvadratka
 /**
  * @brief test mode
- *
- * @param[in] argc number of command-line arguments
- * @param[in] argv pointer to an array of command-line arguments
  */
-void TestingProgram(const int argc, char * argv[]);
+void TestingProgram(void);
 
+/// @}
+
+/// @defgroup kvadratka_general
+/// @ingroup kvadratka_general
+/// @{
 /**
  * @brief the main function with which the program begins
  *
- * @param argc number of command-line arguments
- * @param argv pointer to an array of command-line arguments
  * @return int 0
  */
-int main(int argc, char * argv[])
+int main(void)
 {
-    if (argv != NULL)
+    Greetings();
+
+    bool need_to_quit = false;
+
+    while (!need_to_quit)
     {
-        if (argc == ARGC_FOR_HELP && strcmp(argv[ARGC_FOR_HELP-1], "--help") == 0)
-        {
-            Help();
-        }
+        StartMenu();
 
-        else if (argc >= MINIMUM_ARGC_FOR_TEST && argc <= MAXIMUM_ARGC_FOR_TEST && strcmp(argv[MINIMUM_ARGC_FOR_TEST-1], "test") == 0)
-        {
-            TestingProgram(argc, argv);
-        }
+        int code_of_mode = StartMenuAnswer();
 
-        else if (argc == ARGC_FOR_CLIENT_MODE)
+        if (code_of_mode == CLIENT_MODE)
         {
             ClientProgram();
         }
 
-        else
+        else if (code_of_mode == TEST_MODE)
         {
-            InvalidCommand();
+            TestingProgram();
         }
-    }
 
-    else
-    {
-        printf("Ошибка в считывании аргументов командной строки.\n");
+        else if (code_of_mode == QUIT)
+        {
+            need_to_quit = true;
+        }
     }
 
     return 0;
 }
+
+/// @}
 
 void ClientProgram()
 {
     EquationArgs args = { };
     EquationSolves solves = {.solve1 = NAN, .solve2 = NAN};
 
-    Greetings();
-
     bool need_to_continue = true;
+    RequestForArguments();
 
     while (need_to_continue)
     {
@@ -88,10 +88,18 @@ void ClientProgram()
         if (code_of_error == NO_ERRORS)
         {
             SolutionsOfEquations(&args, &solves);
-
             PrintEnding(&args, &solves);
 
-            ContinueOrStop(&need_to_continue);
+            ClientModeMenu();
+            if (ClientModeMenuAnswer() == BACK)
+            {
+                need_to_continue = false;
+            }
+
+            else
+            {
+                RequestForArguments();
+            }
         }
 
         else
@@ -101,42 +109,36 @@ void ClientProgram()
     }
 }
 
-void TestingProgram(const int argc, char * argv[])
+void TestingProgram(void)
 {
-    assert(argv != NULL);
-
     bool visible_values = false;
-    int number_of_random_tests = DEFAULT_NUMBER_OF_RANDOM_TESTS;
     bool file_testing = false;
-    const char * ptr_name_of_file = DEFAULT_NAME_OF_FILE;
+    char name_of_file[MAX_LEN_OF_FILENAME] = "";
+    int number_of_random_tests = 0;
 
-    for (size_t number_of_arg = MINIMUM_ARGC_FOR_TEST; number_of_arg < size_t (argc); number_of_arg++)
+    VisibleValuesMenu();
+    if (VisibleValuesMenuAnswer() == YES)
     {
-        if (strcmp(argv[number_of_arg], "-f") == 0)
-        {
-            file_testing = true;
-        }
-
-        else if (strcmp(argv[number_of_arg], "-v") == 0)
-        {
-            visible_values = true;
-        }
-
-        else if (atoi(argv[number_of_arg]))
-        {
-            number_of_random_tests = atoi(argv[number_of_arg]);
-        }
-
-        else
-        {
-            ptr_name_of_file = argv[number_of_arg];
-        }
+        visible_values = true;
     }
 
-    TestModeGreetings();
+    FileTestsMenu();
+    if (FileTestsMenuAnswer() == YES)
+    {
+        file_testing = true;
+        RequestForFilename();
+        scanf("%80s", name_of_file); // 80 = MAX_LEN_OF_FILENAME-1
+    }
+
+    else
+    {
+        RequestForNumberOfRandomTests();
+        scanf("%d", &number_of_random_tests);
+    }
+
     if (file_testing)
     {
-        RunFileTests(ptr_name_of_file, visible_values);
+        RunFileTests(name_of_file, visible_values);
     }
 
     else

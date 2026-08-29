@@ -1,22 +1,89 @@
 void Greetings(void)
 {
-    printf("Приветствую, пользователь.\nЯ программа, умеющая решать квадратные уравнения.\n"
-           "Введи 3 числа (сначала коэффициент при x^2, потом при x, потом свободный): ");
+    printf("Приветствую, пользователь.\nЯ программа, умеющая решать квадратные уравнения.\n");
 }
 
-void TestModeGreetings(void)
+void TestMode(void)
 {
-    printf("Начинаю unit-тестирование модуля SolutionsOfEquations.\n");
+    printf("\nНачинаю unit-тестирование модуля SolutionsOfEquations.\n\n");
 }
 
-void Help(void)
+void RequestForArguments(void)
 {
-    printf("У программы есть 2 режима: тестирование и взаимодействие с пользователем.\n");
-    printf("Для режима тестирования надо ввести определённые аргументы в командную строку. Вот пример правильного ввода:\n"
-           "name_of_file test number_of_random_tests (по умолчанию 1000, можно задать"
-           " своё значение) -v (вывод проверяемых аргументов, без флага не выводятся)\n");
-    printf("Также можно подключить тесты из файла, для этого надо ввести флаг -f и написать название файла с тестами (по умолчанию test.txt)\n");
-    printf("В остальных случаях запустится режим взаимодействия с пользователем.\n");
+    printf("\nВведите коэффициенты квадратного уравнения(сначала коэффициент при x^2, потом при x, потом свободный): ");
+}
+
+void RequestForAnswer(void)
+{
+    printf("\nВведите выбранный вариант: ");
+}
+
+void RequestForFilename(void)
+{
+    printf("\nВведите название файла, из которого необходимо брать тесты: ");
+}
+
+void RequestForNumberOfRandomTests(void)
+{
+    printf("\nВведите количество рандомных тестов, которое требуется провести: ");
+}
+
+void StartMenu(void)
+{
+    printf("\nВыберите режим работы программы (введите букву, соответствующую выбранному варианту):\n"
+           "s) Решение уравнений, вводимых с клавиатуры\n"
+           "t) Тестирование программы (запуск тестов из файла или генерация рандомных)\n\n"
+           "q) Завершить работу программы\n");
+    RequestForAnswer();
+}
+
+int StartMenuAnswer(void)
+{
+    int answer = 0;
+
+    while (1)
+    {
+        while (isspace(answer = getchar()))
+        {
+            continue;
+        }
+
+        if (answer == 's' || answer == 'S')
+        {
+            if (CheckString())
+            {
+                return CLIENT_MODE;
+            }
+        }
+
+        else if (answer == 't' || answer == 'T')
+        {
+            if (CheckString())
+            {
+                return TEST_MODE;
+            }
+        }
+
+        else if (answer == 'q' || answer == 'Q')
+        {
+            if (CheckString())
+            {
+                return QUIT;
+            }
+        }
+
+        else
+        {
+            SkipString();
+        }
+
+        InvalidStartMenuAnswer();
+    }
+}
+
+void InvalidStartMenuAnswer(void)
+{
+    printf("Принимаются только ответы s(S)/t(T)/q(Q): ");
 }
 
 int VerificationOfEnteredData(EquationArgs * const ptr_args)
@@ -34,6 +101,36 @@ int VerificationOfEnteredData(EquationArgs * const ptr_args)
     }
 
     return number_of_scanned_args; //number_of_scanned_args <=> code_of_error
+}
+
+void InvalidInput(const int code_of_error, bool * ptr_need_to_continue)
+{
+    assert(ptr_need_to_continue != NULL);
+
+    if (code_of_error == ERROR_A || code_of_error == ERROR_B || code_of_error == ERROR_C)
+    {
+        printf("Аргумент %c введён неверно. Введите данные заново "
+               "(сначала коэффициент при x^2, потом при x, потом свободный): ", 'a' + code_of_error);
+        SkipString();
+    }
+
+    else if (code_of_error == ERROR_EOF)
+    {
+        printf("Конец ввода.");
+        *ptr_need_to_continue = false;
+    }
+
+    else if (code_of_error == ERROR_SO_MANY)
+    {
+        printf("Введены лишние аргументы. Введите данные заново "
+               "(сначала коэффициент при x^2, потом при x, потом свободный): ");
+    }
+
+    else
+    {
+        printf("Произошла непредвиденная ошибка.\n");
+        *ptr_need_to_continue = false;
+    }
 }
 
 void PrintEnding(const EquationArgs * const ptr_args, const EquationSolves * const ptr_solves)
@@ -67,13 +164,17 @@ void PrintEnding(const EquationArgs * const ptr_args, const EquationSolves * con
     }
 }
 
-int ContinueOrStop(bool * ptr_need_to_continue)
+void ClientModeMenu(void)
 {
-    assert(ptr_need_to_continue != NULL);
+    printf("\nЧто хотите делать дальше:\n"
+           "c) Продолжить решение уравнений\n"
+           "b) Вернуться в стартовое меню\n");
+    RequestForAnswer();
+}
 
+int ClientModeMenuAnswer(void)
+{
     int answer = 0;
-
-    printf("Хотите продолжить ввод (введите Y если да или N если нет): ");
 
     while (1)
     {
@@ -82,56 +183,130 @@ int ContinueOrStop(bool * ptr_need_to_continue)
             continue;
         }
 
-        if (answer == 'Y')
+        if (answer == 'c' || answer == 'C')
         {
             if (CheckString())
             {
-                printf("Введи 3 числа (сначала коэффициент при x^2, потом при x, потом свободный): ");
-                return 0;
+                return CONTINUE;
             }
         }
 
-        else if (answer == 'N')
+        else if (answer == 'b' || answer == 'B')
         {
             if (CheckString())
             {
-                printf("Спасибо, что пользовались моей программой.");
-                *ptr_need_to_continue = false;
-                return 0;
+                return BACK;
             }
         }
 
-        InvalidAnswer();
+        else
+        {
+            SkipString();
+        }
+
+        InvalidClientModeMenuAnswer();
     }
 }
 
-void InvalidInput(const int code_of_error, bool * ptr_need_to_continue)
+void InvalidClientModeMenuAnswer(void)
 {
-    assert(ptr_need_to_continue != NULL);
+    printf("Принимаются только ответы c(C)/b(B): ");
+}
 
-    if (code_of_error == ERROR_A || code_of_error == ERROR_B || code_of_error == ERROR_C)
+void VisibleValuesMenu(void)
+{
+    printf("\nХотите видеть аргументы и полученные решения в верных тестах:\n");
+    YesOrNoMenu();
+    RequestForAnswer();
+}
+
+int VisibleValuesMenuAnswer(void)
+{
+    int answer = 0;
+
+    while (1)
     {
-        printf("Аргумент %c введён неверно. Введите данные заново "
-               "(сначала коэффициент при x^2, потом при x, потом свободный): ", 'a' + code_of_error);
-        SkipString();
+        while (isspace(answer = getchar()))
+        {
+            continue;
+        }
+
+        if (answer == 'y' || answer == 'Y')
+        {
+            if (CheckString())
+            {
+                return YES;
+            }
+        }
+
+        else if (answer == 'n' || answer == 'N')
+        {
+            if (CheckString())
+            {
+                return NO;
+            }
+        }
+
+        else
+        {
+            SkipString();
+        }
+
+        InvalidYesOrNoMenuAnswer();
     }
+}
 
-    else if (code_of_error == ERROR_EOF)
-    {
-        printf("Конец файла.");
-        *ptr_need_to_continue = false;
-    }
+void YesOrNoMenu(void)
+{
+    printf("y) Да\n"
+           "n) Нет\n");
+}
 
-    else if (code_of_error == ERROR_SO_MANY)
-    {
-        printf("Введены лишние аргументы. Введите данные заново "
-               "(сначала коэффициент при x^2, потом при x, потом свободный): ");
-    }
+void InvalidYesOrNoMenuAnswer(void)
+{
+    printf("Принимаются только ответы y(Y)/n(N): ");
+}
 
-    else
+void FileTestsMenu(void)
+{
+    printf("\nХотите подключить тесты из файла:\n");
+    YesOrNoMenu();
+    RequestForAnswer();
+}
+
+int FileTestsMenuAnswer(void)
+{
+    int answer = 0;
+
+    while (1)
     {
-        printf("Произошла непредвиденная ошибка.\n");
-        *ptr_need_to_continue = false;
+        while (isspace(answer = getchar()))
+        {
+            continue;
+        }
+
+        if (answer == 'y' || answer == 'Y')
+        {
+            if (CheckString())
+            {
+                return YES;
+            }
+        }
+
+        else if (answer == 'n' || answer == 'N')
+        {
+            if (CheckString())
+            {
+                return NO;
+            }
+        }
+
+        else
+        {
+            SkipString();
+        }
+
+        InvalidYesOrNoMenuAnswer();
     }
 }
 
@@ -143,7 +318,7 @@ void PrintEq(const EquationArgs * const ptr_args)
     double b = ptr_args->b;
     double c = ptr_args->c;
 
-    printf("У уравнения ");
+    printf("\nУ уравнения ");
 
     if (ComparisonOfFractalNumbers(a, 0.0) != EQUAL)
     {
@@ -223,16 +398,6 @@ void PrintErrorValues(const EquationArgs * const ptr_args, const EquationSolves 
     ErrorInCalc();
     printf("a = %.3lf, b = %.3lf, c = %.3lf, number_of_solves = %d, x1 = %.3lf, x2 = %.3lf.\n",
     ptr_args->a, ptr_args->b, ptr_args->c, ptr_solves->number_of_solves, ptr_solves->solve1, ptr_solves->solve2);
-}
-
-void InvalidAnswer(void)
-{
-    printf("Принимаются только ответы Y/N (введите Y если да или N если нет): ");
-}
-
-void InvalidCommand(void)
-{
-    printf("Ошибка в аргументах командной строки. Для получения помощи в использовании программы введите флаг --help при запуске.\n");
 }
 
 void ErrorInCalc(void)

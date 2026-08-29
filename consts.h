@@ -5,17 +5,26 @@
 const double EPS = 1e-6; ///< tolerance for comparing doubles
 const int NUMBER_OF_EQUATION_ARGS = 3; ///< number of arguments of a quadratic equation
 const int CODE_OF_CTRL_Z = 26; ///< ctrl+z code (simulating end-of-file)
-
-const int DEFAULT_NUMBER_OF_RANDOM_TESTS = 1000; ///< default number of random tests
 const double ACCURACY = 1000; ///< precision of generated random doubles
-const char DEFAULT_NAME_OF_FILE[] = "test.txt"; ///< default test filename
+const int MAX_LEN_OF_FILENAME = 81; ///< default test filename
 
-enum ArgcForModes
+enum CodeOfModes
 {
-    ARGC_FOR_HELP = 2, ///< number of command-line arguments for invoking the program usage summary
-    MINIMUM_ARGC_FOR_TEST = 2, ///< minimum number of command-line arguments for test mode
-    MAXIMUM_ARGC_FOR_TEST = 5, ///< maximum number of command-line arguments for test mode
-    ARGC_FOR_CLIENT_MODE = 1 ///< number of command-line arguments for user interaction mode
+    CLIENT_MODE = 1, ///< code of client mode
+    TEST_MODE = 2, ///< code of test mode
+    QUIT = 0 ///< code of quit mode
+};
+
+enum CodeOfClientModeAnswers
+{
+    CONTINUE = 1, ///< code of continuation of solving equations
+    BACK = 0 ///< code of back to start menu
+};
+
+enum CodeOfYesOrNoAnswers
+{
+    YES = 1, ///< code of "yes" answer
+    NO = 0 ///< code of "no" answer
 };
 
 enum Comparison
@@ -33,15 +42,14 @@ enum Solves
     TWO_SOLVES = 2 ///< a constant indicating that the equation has two solutions
 };
 
-enum EquationErrors
+enum CodeOfEquationErrors
 {
-    ERROR_EOF = -1, ///< End-of-file error code
+    ERROR_EOF = -1, ///< end-of-file error code
     ERROR_A = 0, ///< error code in argument a
     ERROR_B = 1, ///< error code in argument b
     ERROR_C = 2, ///< error code in argument c
     NO_ERRORS = 3, ///< error-free code
     ERROR_SO_MANY = 4, ///< error code for too many arguments
-    UNEXPECTED_ERROR = 5 ///< unexpected error code
 };
 
 /// @}

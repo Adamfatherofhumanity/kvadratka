@@ -1,5 +1,7 @@
 void RunTests(const int number_of_random_tests, const bool visible_values)
 {
+    TestMode();
+
     if (visible_values)
     {
         printf("\nНачинаю прохождение заданных тестов.\n\n");
@@ -30,6 +32,8 @@ void RunFileTests(const char * const ptr_name_of_file, const bool visible_values
 
     if (ptr_test_file != NULL)
     {
+        TestMode();
+
         TestCase test = { };
 
         EquationArgs * const ptr_args = &test.args;
@@ -47,16 +51,16 @@ void RunFileTests(const char * const ptr_name_of_file, const bool visible_values
 
             else
             {
-                printf("Произошла ошибка в вычислениях на %d тесте.\n", iteration);
+                printf("\nПроизошла ошибка в вычислениях на %d тесте.\n", iteration);
             }
         }
 
-        printf("Конец файла. Тестирование окончено. Пройдено %d/%d тестов.\n", success_file_tests, iteration);
+        printf("\nКонец файла. Тестирование окончено. Пройдено %d/%d тестов.\n", success_file_tests, iteration);
     }
 
     else
     {
-        printf("Не удалось открыть файл %s.\n", ptr_name_of_file);
+        printf("\nНе удалось открыть файл %s.\n", ptr_name_of_file);
     }
 }
 
@@ -73,7 +77,7 @@ int RunSpecialTests(const bool visible_values)
 
         else
         {
-            printf("Произошла ошибка в вычислениях на %zu тесте.\n", iteration+1);
+            printf("\nПроизошла ошибка в вычислениях на %zu тесте.\n", iteration+1);
         }
     }
 

@@ -10,12 +10,48 @@ void Greetings(void);
 /**
  * @brief greeting in test mode
  */
-void TestModeGreetings(void);
+void TestMode(void);
+
+
 
 /**
- * @brief displaying the program usage guide
+ * @brief prompts the user to enter arguments
  */
-void Help(void);
+void RequestForArguments(void);
+
+/**
+ * @brief prompts the user to enter answer
+ */
+void RequestForAnswer(void);
+
+/**
+ * @brief prompts the user to enter filename
+ */
+void RequestForFilename(void);
+
+/**
+ * @brief prompts the user to enter number of random tests
+ */
+void RequestForNumberOfRandomTests(void);
+
+
+
+/**
+ * @brief displaying the start menu for using program (to choose mode)
+ */
+void StartMenu(void);
+
+/**
+ * @brief validates the input answer and returns code of choosen mode
+ *
+ * @return int code of mode (CLIENT_MODE/TEST_MODE/QUIT)
+ */
+int StartMenuAnswer(void);
+
+/**
+ * @brief displays a message about an invalid response format in start menu [s(S)/t(T)/q(Q)]
+ */
+void InvalidStartMenuAnswer(void);
 
 
 
@@ -23,9 +59,17 @@ void Help(void);
  * @brief validates the input arguments and writes them to the structure
  *
  * @param[out] ptr_args pointer to the structure where the arguments are to be written
- * @return int code of error
+ * @return int code of error (ERROR_EOF/ERROR_A/ERROR_B/ERROR_C/NO_ERRORS/ERROR_SO_MANY/)
  */
 int VerificationOfEnteredData(EquationArgs * const ptr_args);
+
+/**
+ * @brief displays an error message based on its code and switches the flag in case of a critical error
+ *
+ * @param[in] code_of_error code of error
+ * @param[out] ptr_need_to_continue pointer to a flag that toggles if a critical error occurs
+ */
+void InvalidInput(const int code_of_error, bool * ptr_need_to_continue);
 
 /**
  * @brief outputs the quadratic equation and its solutions
@@ -35,21 +79,64 @@ int VerificationOfEnteredData(EquationArgs * const ptr_args);
  */
 void PrintEnding(const EquationArgs * const ptr_args, const EquationSolves * const ptr_solves);
 
-/**
- * @brief asks the user if they want to continue.
- *
- * @param[out] ptr_need_to_continue pointer to a flag that is toggled if the user declines to continue.
- * @return int 0 to break the infinite loop
- */
-int ContinueOrStop(bool * ptr_need_to_continue);
+
 
 /**
- * @brief displays an error message based on its code and switches the flag in case of a critical error
- *
- * @param[in] code_of_error code of error
- * @param[out] ptr_need_to_continue pointer to a flag that toggles if a critical error occurs
+ * @brief asks the user if they want to continue solving equations
  */
-void InvalidInput(const int code_of_error, bool * ptr_need_to_continue);
+void ClientModeMenu(void);
+
+/**
+ * @brief validates the input answer and returns code of chosen answer
+ *
+ * @return int code of chosen answer (CONTINUE/BACK)
+ */
+int ClientModeMenuAnswer(void);
+
+/**
+ * @brief displays a message about an invalid response format in client mode menu [c(C)/b(B)]
+ */
+void InvalidClientModeMenuAnswer(void);
+
+
+
+/**
+ * @brief asks the user if they want to see arguments and solves of success tests
+ */
+void VisibleValuesMenu(void);
+
+/**
+ * @brief validates the input answer and returns code of chosen answer
+ *
+ * @return int code of chosen answer (YES/NO)
+ */
+int VisibleValuesMenuAnswer(void);
+
+
+
+/**
+ * @brief offers "yes" or "no" answer options
+ */
+void YesOrNoMenu(void);
+
+/**
+ * @brief displays a message about an invalid response format in "yes" or "no" menu [y(Y)/n(N)]
+ */
+void InvalidYesOrNoMenuAnswer(void);
+
+
+
+/**
+ * @brief asks the user if they want to runs tests from file
+ */
+void FileTestsMenu(void);
+
+/**
+ * @brief validates the input answer and returns code of chosen answer
+ *
+ * @return int code of chosen answer (YES/NO)
+ */
+int FileTestsMenuAnswer(void);
 
 
 
@@ -91,16 +178,6 @@ bool PrintSolve(const TestCase * const ptr_test, const EquationSolves * const pt
 void PrintErrorValues(const EquationArgs * const ptr_args, const EquationSolves * const ptr_solves);
 
 
-
-/**
- * @brief displays a message about an invalid response format [Y/N]
- */
-void InvalidAnswer(void);
-
-/**
- * @brief outputs an error message regarding command-line arguments
- */
-void InvalidCommand(void);
 
 /**
  * @brief displays a calculation error message

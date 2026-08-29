@@ -11,7 +11,7 @@
 void RunTests(const int number_of_random_tests, const bool visible_values);
 
 /**
- * @brief runs tests from a file
+ * @brief runs tests from a file (if the file cannot be opened, it displays a message to that effect and terminates)
  *
  * @param[in] ptr_name_of_file pointer to a filename
  * @param[in] visible_values a flag indicating whether to output the arguments and the resulting solutions of the quadratic equation
