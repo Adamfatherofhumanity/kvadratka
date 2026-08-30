@@ -28,6 +28,11 @@ void RequestForNumberOfRandomTests(void)
     printf("\nВведите количество рандомных тестов, которое требуется провести: ");
 }
 
+void RequestForEscape(void)
+{
+    printf("\nЕсли хотите прекратить рассмотрение графика то нажмите Esc.\n");
+}
+
 void StartMenu(void)
 {
     printf("\nВыберите режим работы программы (введите букву, соответствующую выбранному варианту):\n"

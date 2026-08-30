@@ -80,3 +80,39 @@ void SkipString(void)
         continue;
     }
 }
+
+void PlottingTheGraph(EquationArgs * const ptr_args, ImageModificationParameters * const ptr_pars)
+{
+    CanvasPreparation(ptr_pars);
+
+    double x_prev = -250;
+    double y_prev = ptr_args->a * x_prev * x_prev + ptr_args->b * x_prev + ptr_args->c;
+
+    for (double x_curr = -250; x_curr <= WIDTH / 2; x_curr += 0.1)
+    {
+        double y_curr = ptr_args->a * x_curr * x_curr + ptr_args->b * x_curr + ptr_args->c;
+
+        txLine (WIDTH / 2 + ptr_pars->scale * x_prev - ptr_pars->x_offset, HEIGHT / 2 - ptr_pars->scale * y_prev + ptr_pars->y_offset,
+                WIDTH / 2 + ptr_pars->scale * x_curr - ptr_pars->x_offset, HEIGHT / 2 - ptr_pars->scale * y_curr + ptr_pars->y_offset);
+
+        x_prev = x_curr;
+        y_prev = y_curr;
+    }
+}
+
+void CreatingCanvas(ImageModificationParameters * const ptr_pars)
+{
+    _txConsole = -1;
+    txCreateWindow(WIDTH, HEIGHT);
+    ShowWindow(txWindow(), SW_HIDE);
+    CanvasPreparation(ptr_pars);
+}
+
+void CanvasPreparation(ImageModificationParameters * const ptr_pars)
+{
+    txClear();
+    txSetColor(TX_BLACK, LINE_THICKNESS);
+    txLine(0, HEIGHT / 2 + ptr_pars->y_offset, WIDTH, HEIGHT / 2 + ptr_pars->y_offset);
+    txLine(WIDTH / 2 - ptr_pars->x_offset, 0, WIDTH / 2 - ptr_pars->x_offset, HEIGHT);
+    txSetColor(TX_BLACK, GRAPH_THICKNESS);
+}

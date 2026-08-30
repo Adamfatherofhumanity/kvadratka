@@ -2,7 +2,7 @@
 /// @ingroup kvadratka_consts
 /// @{
 
-const double EPS = 1e-6; ///< tolerance for comparing doubles
+const double EPS = 1e-9; ///< tolerance for comparing doubles
 const int NUMBER_OF_EQUATION_ARGS = 3; ///< number of arguments of a quadratic equation
 const int CODE_OF_CTRL_Z = 26; ///< ctrl+z code (simulating end-of-file)
 const double ACCURACY = 1000; ///< precision of generated random doubles
@@ -49,7 +49,15 @@ enum CodeOfEquationErrors
     ERROR_B = 1, ///< error code in argument b
     ERROR_C = 2, ///< error code in argument c
     NO_ERRORS = 3, ///< error-free code
-    ERROR_SO_MANY = 4, ///< error code for too many arguments
+    ERROR_SO_MANY = 4 ///< error code for too many arguments
+};
+
+enum ChartParameters
+{
+    WIDTH = 800, ///< chart width
+    HEIGHT = 900, ///< chart height
+    LINE_THICKNESS = 1, ///< axis thickness on the graph
+    GRAPH_THICKNESS = 2 ///< thickness of the graph
 };
 
 /// @}
@@ -85,6 +93,13 @@ struct TestCase
 {
     EquationArgs args; ///< a structure consisting of the arguments of a quadratic equation
     EquationSolves reference_solves; ///< a structure consisting of the reference solutions to a quadratic equation
+};
+
+struct ImageModificationParameters
+{
+    double scale; ///< by what factor the graph is scaled up
+    int x_offset; ///< x-axis displacement
+    int y_offset; ///< y-axis displacement
 };
 
 /// @}

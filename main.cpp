@@ -1,3 +1,4 @@
+#define TX_CONSOLE_MODE  SW_SHOW
 #include "TXLib.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,6 +43,8 @@ void TestingProgram(void);
  */
 int main(void)
 {
+    ImageModificationParameters pars = { };
+    CreatingCanvas(&pars);
     Greetings();
 
     bool need_to_quit = false;
@@ -68,6 +71,7 @@ int main(void)
         }
     }
 
+    txDisableAutoPause();
     return 0;
 }
 
@@ -75,6 +79,9 @@ int main(void)
 
 void ClientProgram()
 {
+    ShowWindow(txWindow(), SW_SHOW);
+    ImageModificationParameters pars = {.scale = 1};
+
     EquationArgs args = { };
     EquationSolves solves = {.solve1 = NAN, .solve2 = NAN};
 
@@ -87,8 +94,60 @@ void ClientProgram()
 
         if (code_of_error == NO_ERRORS)
         {
+            pars = {.scale = 1};
+            txEnd();
+            PlottingTheGraph(&args, &pars);
+            txBegin();
+
             SolutionsOfEquations(&args, &solves);
             PrintEnding(&args, &solves);
+            RequestForEscape();
+
+            while (!txGetAsyncKeyState(VK_ESCAPE))
+            {
+                if (txGetAsyncKeyState(VK_UP))
+                {
+                    pars.y_offset += 1;
+                    txEnd();
+                }
+
+                else if (txGetAsyncKeyState(VK_DOWN))
+                {
+                    pars.y_offset -= 1;
+                    txEnd();
+                }
+
+                else if (txGetAsyncKeyState(VK_RIGHT))
+                {
+                    pars.x_offset += 1;
+                    txEnd();
+                }
+
+                else if (txGetAsyncKeyState(VK_LEFT))
+                {
+                    pars.x_offset -= 1;
+                    txEnd();
+                }
+
+                else if (txGetAsyncKeyState(VK_OEM_PLUS))
+                {
+                    pars.scale += 0.1;
+                    txEnd();
+                }
+
+                else if (txGetAsyncKeyState(VK_OEM_MINUS))
+                {
+                    if ((pars.scale -= 0.1) <= 0)
+                    {
+                        pars.scale = 0.1;
+                    }
+                    txEnd();
+                }
+
+                PlottingTheGraph(&args, &pars);
+                txBegin();
+                txSleep();
+            }
 
             ClientModeMenu();
             if (ClientModeMenuAnswer() == BACK)
@@ -107,6 +166,8 @@ void ClientProgram()
             InvalidInput(code_of_error, &need_to_continue);
         }
     }
+
+    ShowWindow(txWindow(), SW_HIDE);
 }
 
 void TestingProgram(void)
@@ -114,7 +175,7 @@ void TestingProgram(void)
     bool visible_values = false;
     bool file_testing = false;
     char name_of_file[MAX_LEN_OF_FILENAME] = "";
-    int number_of_random_tests = 0;
+    unsigned long long number_of_random_tests = 0;
 
     VisibleValuesMenu();
     if (VisibleValuesMenuAnswer() == YES)
@@ -133,7 +194,7 @@ void TestingProgram(void)
     else
     {
         RequestForNumberOfRandomTests();
-        scanf("%d", &number_of_random_tests);
+        scanf("%llu", &number_of_random_tests);
     }
 
     if (file_testing)

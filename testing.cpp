@@ -1,4 +1,4 @@
-void RunTests(const int number_of_random_tests, const bool visible_values)
+void RunTests(const unsigned long long number_of_random_tests, const bool visible_values)
 {
     TestMode();
 
@@ -14,9 +14,9 @@ void RunTests(const int number_of_random_tests, const bool visible_values)
         printf("\nНачинаю прохождение рандомных тестов.\n\n");
     }
 
-    int success_random_tests = RunRandomTests(number_of_random_tests, visible_values);
+    unsigned long long success_random_tests = RunRandomTests(number_of_random_tests, visible_values);
 
-    printf("\nТестирование окончено. Пройдено %d/%zu заданных тестов и %d/%d рандомных тестов.\n",
+    printf("\nТестирование окончено. Пройдено %d/%zu заданных тестов и %llu/%llu рандомных тестов.\n",
         success_special_tests, sizeof (SPECIAL_TESTS_VALUES) / sizeof (TestCase), success_random_tests, number_of_random_tests);
 }
 
@@ -84,7 +84,7 @@ int RunSpecialTests(const bool visible_values)
     return success_special_tests;
 }
 
-int RunRandomTests(const int number_of_random_tests, const bool visible_values)
+int RunRandomTests(const unsigned long long number_of_random_tests, const bool visible_values)
 {
     EquationArgs args = { };
     EquationSolves solves = {.solve1 = NAN, .solve2 = NAN};

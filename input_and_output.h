@@ -34,6 +34,11 @@ void RequestForFilename(void);
  */
 void RequestForNumberOfRandomTests(void);
 
+/**
+ * @brief prompts the user to click escape
+ */
+void RequestForEscape(void);
+
 
 
 /**

@@ -3,7 +3,7 @@
 //=================================================================================================================
 //           [These sections are for folding control  in Code::Blocks]         [$Date: 2025-12-31 23:02:50 +0400 $]
 //           [Best viewed with "Fold all on file open" option enabled]         [Best screen/page width = 120 chars]
-//                                                                                                                 
+//
 //           [If RUSSIAN CHARS below are UNREADABLE, check this file codepage. It should be CP1251, NOT UTF-8 etc.]
 //{          [Use RELOAD options in your IDE or editor (CLion / Visual Studio Code / ...), and do NOT use Convert.]
 //=================================================================================================================
@@ -16867,16 +16867,16 @@ using ::std::wstring;
 //=================================================================================================================
 // EOF
 //=================================================================================================================
-                                                                                                                   
-                                                                                                                   
-                                                                                                                   
-                                                                                                                   
-                                                                                                                   
-                                                                                                                   
-                                                                                                                   
-                                                                                                                   
-                                                                                                                   
-        
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -58,3 +58,33 @@ bool CheckString(void);
 void SkipString(void);
 
 /// @}
+
+
+
+/// @defgroup kvadratka_graphics
+/// @ingroup kvadratka_graphics
+/// @{
+
+/**
+ * @brief plots the graph of a quadratic equation
+ *
+ * @param ptr_args pointer to a structure containing arguments
+ * @param ptr_pars pointer to a structure containing parameters of image
+ */
+void PlottingTheGraph(EquationArgs * const ptr_args, ImageModificationParameters * const ptr_pars);
+
+/**
+ * @brief creating a canvas for the graph of a quadratic equation
+ *
+ * @param ptr_pars pointer to a structure containing parameters of image
+ */
+void CreatingCanvas(ImageModificationParameters * const ptr_pars);
+
+/**
+ * @brief preparing a canvas for the graph of a quadratic equation
+ *
+ * @param ptr_pars pointer to a structure containing parameters of image
+ */
+void CanvasPreparation(ImageModificationParameters * const ptr_pars);
+
+/// @}

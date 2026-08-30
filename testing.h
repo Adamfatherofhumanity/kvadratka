@@ -8,7 +8,7 @@
  * @param[in] number_of_random_tests number of random tests
  * @param[in] visible_values a flag indicating whether to output the arguments and the resulting solutions of the quadratic equation
  */
-void RunTests(const int number_of_random_tests, const bool visible_values);
+void RunTests(const unsigned long long number_of_random_tests, const bool visible_values);
 
 /**
  * @brief runs tests from a file (if the file cannot be opened, it displays a message to that effect and terminates)
@@ -33,7 +33,7 @@ int RunSpecialTests(const bool visible_values);
  * @param[in] visible_values a flag indicating whether to output the arguments and the resulting solutions of the quadratic equation
  * @return int number of successfully passed random tests
  */
-int RunRandomTests(const int number_of_random_tests, const bool visible_values);
+int RunRandomTests(const unsigned long long number_of_random_tests, const bool visible_values);
 
 /**
  * @brief runs one test
