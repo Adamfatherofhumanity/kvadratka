@@ -8,6 +8,10 @@ const int CODE_OF_CTRL_Z = 26; ///< ctrl+z code (simulating end-of-file)
 const double ACCURACY = 1000; ///< precision of generated random doubles
 const int MAX_LEN_OF_FILENAME = 81; ///< default test filename
 
+const double STEP_X = 0.1; ///< the step with which the x is performed
+const double STEP_SCALE = 0.1; ///< the step with which the scale is performed
+const int STEP_X_OR_Y_OFFSET = 1; ///< the step with which the x_offset or y_offset is performed
+
 enum CodeOfModes
 {
     CLIENT_MODE = 1, ///< code of client mode
@@ -95,6 +99,9 @@ struct TestCase
     EquationSolves reference_solves; ///< a structure consisting of the reference solutions to a quadratic equation
 };
 
+/**
+ * @brief a structure consisting modification parameters of image
+ */
 struct ImageModificationParameters
 {
     double scale; ///< by what factor the graph is scaled up

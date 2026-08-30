@@ -30,7 +30,7 @@ void RequestForNumberOfRandomTests(void)
 
 void RequestForEscape(void)
 {
-    printf("\nЕсли хотите прекратить рассмотрение графика то нажмите Esc.\n");
+    printf("\nЕсли хотите перейти к следующим действиям, то нажмите Esc.\n");
 }
 
 void StartMenu(void)

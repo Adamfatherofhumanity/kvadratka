@@ -1,4 +1,5 @@
 #define TX_CONSOLE_MODE  SW_SHOW
+#define NDEBUG
 #include "TXLib.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -102,52 +103,7 @@ void ClientProgram()
             SolutionsOfEquations(&args, &solves);
             PrintEnding(&args, &solves);
             RequestForEscape();
-
-            while (!txGetAsyncKeyState(VK_ESCAPE))
-            {
-                if (txGetAsyncKeyState(VK_UP))
-                {
-                    pars.y_offset += 1;
-                    txEnd();
-                }
-
-                else if (txGetAsyncKeyState(VK_DOWN))
-                {
-                    pars.y_offset -= 1;
-                    txEnd();
-                }
-
-                else if (txGetAsyncKeyState(VK_RIGHT))
-                {
-                    pars.x_offset += 1;
-                    txEnd();
-                }
-
-                else if (txGetAsyncKeyState(VK_LEFT))
-                {
-                    pars.x_offset -= 1;
-                    txEnd();
-                }
-
-                else if (txGetAsyncKeyState(VK_OEM_PLUS))
-                {
-                    pars.scale += 0.1;
-                    txEnd();
-                }
-
-                else if (txGetAsyncKeyState(VK_OEM_MINUS))
-                {
-                    if ((pars.scale -= 0.1) <= 0)
-                    {
-                        pars.scale = 0.1;
-                    }
-                    txEnd();
-                }
-
-                PlottingTheGraph(&args, &pars);
-                txBegin();
-                txSleep();
-            }
+            ImageModification(&args, &pars);
 
             ClientModeMenu();
             if (ClientModeMenuAnswer() == BACK)

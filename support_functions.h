@@ -71,7 +71,7 @@ void SkipString(void);
  * @param ptr_args pointer to a structure containing arguments
  * @param ptr_pars pointer to a structure containing parameters of image
  */
-void PlottingTheGraph(EquationArgs * const ptr_args, ImageModificationParameters * const ptr_pars);
+void PlottingTheGraph(const EquationArgs * const ptr_args, ImageModificationParameters * const ptr_pars);
 
 /**
  * @brief creating a canvas for the graph of a quadratic equation
@@ -86,5 +86,13 @@ void CreatingCanvas(ImageModificationParameters * const ptr_pars);
  * @param ptr_pars pointer to a structure containing parameters of image
  */
 void CanvasPreparation(ImageModificationParameters * const ptr_pars);
+
+/**
+ * @brief changes the image (moves with arrows, zooms in or out)
+ *
+ * @param ptr_args pointer to a structure containing arguments
+ * @param ptr_pars pointer to a structure containing parameters of image
+ */
+void ImageModification(const EquationArgs * const ptr_args, ImageModificationParameters * const ptr_pars);
 
 /// @}
